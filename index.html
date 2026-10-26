@@ -177,14 +177,15 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // CẤU HÌNH CỦA BẠN (MÃ ĐÃ ĐƯỢC MỞ KHÓA TỪ BƯỚC TRƯỚC)
-        const YOUR_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyA3T3ieR1CCc8bn5Ahx4BTXLRWRv3FArzY",
-            authDomain: "quanlichitieu-309d3.firebaseapp.com",
-            projectId: "quanlichitieu-309d3",
-            storageBucket: "quanlichitieu-309d3.firebasestorage.app",
-            messagingSenderId: "781705621246",
-            appId: "1:781705621246:web:a090f5228eccb7ad4affaf"
-        };
+const firebaseConfig = {
+  apiKey: "AIzaSyA3T3ieR1CcC8bn5Ahx4BTXLRWRv3FArzY",
+  authDomain: "quanlichitieu-309d3.firebaseapp.com",
+  projectId: "quanlichitieu-309d3",
+  storageBucket: "quanlichitieu-309d3.firebasestorage.app",
+  messagingSenderId: "781705621246",
+  appId: "1:781705621246:web:a090f5228eccb7ad4affaf",
+  measurementId: "G-RRHFY1N26E"
+};
 
         // Khởi tạo các biến toàn cục
         let app, auth, db;
