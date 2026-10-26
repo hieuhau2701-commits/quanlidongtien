@@ -9,158 +9,90 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .loader { border-top-color: #10b981; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
     <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
-    <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-slate-100">
-        <div class="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 border border-slate-100">
+    <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-800 to-slate-900">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-8 relative">
             
-            <!-- Cột trái: Giới thiệu -->
-            <div class="bg-gradient-to-br from-emerald-800 to-teal-900 text-white p-8 flex flex-col justify-between">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500 flex items-center justify-center font-bold text-2xl text-white shadow-lg mb-4">₫</div>
+                <h1 class="text-2xl font-bold text-slate-800">FinFamily Cloud</h1>
+                <p class="text-sm text-slate-500 mt-1">Hệ thống đồng bộ dữ liệu đám mây</p>
+                <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-medium text-slate-600">
+                    <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="connText">Đang chờ kết nối Firebase...</span>
+                </div>
+            </div>
+
+            <!-- Chuyển tab -->
+            <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6">
+                <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition">Đăng nhập</button>
+                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition">Đăng ký mới</button>
+            </div>
+
+            <!-- Hộp thông báo lỗi / trạng thái -->
+            <div id="authAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border text-center"></div>
+
+            <form id="authForm" class="space-y-4">
+                <div id="familyNameGroup" class="hidden">
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Tên Quỹ / Gia đình</label>
+                    <input type="text" id="authFamilyName" placeholder="VD: Gia đình Phạm Hiếu" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
+                </div>
+
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-700/60 border border-emerald-500/40 text-xs font-medium mb-6">
-                        <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                        <span id="connText">Đang kết nối Firebase Cloud...</span>
-                    </div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-11 h-11 rounded-2xl bg-emerald-500 flex items-center justify-center font-bold text-xl shadow-lg">₫</div>
-                        <div>
-                            <h1 class="text-2xl font-bold tracking-tight">FinFamily Cloud</h1>
-                            <p class="text-emerald-200 text-xs">Hệ thống Quản lý Dòng tiền Gia đình</p>
-                        </div>
-                    </div>
-                    <p class="text-emerald-100/90 text-sm leading-relaxed mb-6">
-                        Kiểm soát thu nhập, chi tiêu, ngân sách và tỷ lệ tiết kiệm của cả gia đình theo thời gian thực. Dữ liệu được bảo vệ riêng biệt cho từng tài khoản.
-                    </p>
-                    <div class="space-y-3 text-sm">
-                        <div class="p-3.5 rounded-2xl bg-white/10 border border-white/10">
-                            <p class="font-semibold">📊 Trực quan hóa dòng tiền</p>
-                            <p class="text-xs text-emerald-200 mt-0.5">Biểu đồ cơ cấu chi tiêu & so sánh Thu - Chi tự động cập nhật.</p>
-                        </div>
-                        <div class="p-3.5 rounded-2xl bg-white/10 border border-white/10">
-                            <p class="font-semibold">👨‍👩‍👧‍👦 Quản lý theo thành viên</p>
-                            <p class="text-xs text-emerald-200 mt-0.5">Ghi nhận chi tiết giao dịch của Bố, Mẹ, Con cái và Quỹ chung.</p>
-                        </div>
-                        <div class="p-3.5 rounded-2xl bg-white/10 border border-white/10">
-                            <p class="font-semibold">🔒 Bảo mật & Đồng bộ Hybrid</p>
-                            <p class="text-xs text-emerald-200 mt-0.5">Kết nối Firebase Auth & Cloud Firestore kèm sao lưu an toàn.</p>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-xs text-emerald-300/70 mt-6">Dự án: quanlichitieu-309d3 • Phiên bản 3.0 Stable</p>
-            </div>
-
-            <!-- Cột phải: Form Đăng nhập / Đăng ký -->
-            <div class="p-8 flex flex-col justify-center">
-                <!-- Chuyển tab -->
-                <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6">
-                    <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition">Đăng nhập</button>
-                    <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition">Đăng ký tài khoản</button>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Địa chỉ Email</label>
+                    <input type="email" id="authEmail" required placeholder="email-cua-ban@gmail.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
                 </div>
 
-                <h2 id="authTitle" class="text-2xl font-bold text-slate-800 mb-1">Đăng nhập Quỹ Gia đình</h2>
-                <p id="authSubtitle" class="text-xs text-slate-500 mb-5">Truy cập không gian quản lý tài chính của gia đình bạn.</p>
-
-                <!-- Hộp thông báo lỗi / trạng thái -->
-                <div id="authAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border"></div>
-
-                <form id="authForm" class="space-y-4">
-                    <div id="familyNameGroup" class="hidden">
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Tên Quỹ / Gia đình</label>
-                        <input type="text" id="authFamilyName" placeholder="Ví dụ: Gia đình Phạm Hiếu" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Địa chỉ Email</label>
-                        <input type="email" id="authEmail" required placeholder="gia-dinh-cua-ban@email.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Mật khẩu bảo mật</label>
-                        <input type="password" id="authPassword" required minlength="6" placeholder="Tối thiểu 6 ký tự" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
-                    </div>
-
-                    <div id="confirmPassGroup" class="hidden">
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Nhập lại mật khẩu</label>
-                        <input type="password" id="authConfirmPassword" placeholder="Xác nhận lại mật khẩu" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
-                    </div>
-
-                    <button type="submit" id="authSubmitBtn" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition">
-                        Đăng nhập vào Quỹ →
-                    </button>
-                </form>
-
-                <div class="relative my-5 flex items-center justify-center">
-                    <div class="border-t border-slate-200 w-full"></div>
-                    <span class="bg-white px-3 text-xs text-slate-400 whitespace-nowrap">HOẶC TRẢI NGHIỆM NHANH</span>
-                    <div class="border-t border-slate-200 w-full"></div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Mật khẩu</label>
+                    <input type="password" id="authPassword" required minlength="6" placeholder="Tối thiểu 6 ký tự" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
                 </div>
 
-                <button type="button" onclick="loginDemoAccount()" class="w-full py-2.5 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100/70 text-emerald-800 font-medium text-xs transition">
-                    ⚡ Đăng nhập nhanh Tài khoản Gia đình Mẫu (Có sẵn dữ liệu)
+                <button type="submit" id="authSubmitBtn" class="w-full py-3.5 mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
+                    <span>Đăng nhập đồng bộ Cloud</span>
                 </button>
-            </div>
+            </form>
         </div>
     </div>
 
     <!-- MÀN HÌNH CHÍNH (DASHBOARD) -->
     <div id="appScreen" class="hidden flex-1 flex flex-col">
         <!-- Header -->
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow">₫</div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">₫</div>
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 id="headerFamilyName" class="font-bold text-slate-800 text-base">Quỹ Gia Đình</h1>
-                            <span id="syncBadge" class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-emerald-100 text-emerald-700">● Đã bảo mật</span>
+                            <span class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-emerald-100 text-emerald-700 uppercase flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đang trực tuyến
+                            </span>
                         </div>
-                        <p id="headerUserEmail" class="text-xs text-slate-500">user@email.com</p>
+                        <p id="headerUserEmail" class="text-xs text-slate-500 font-medium">user@email.com</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <input type="month" id="monthFilter" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium bg-slate-50">
-                    <button onclick="exportCSV()" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-xs font-medium transition">📥 Xuất Excel/CSV</button>
-                    <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition">Đăng xuất</button>
+                    <button onclick="handleLogout()" class="px-4 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition">Đăng xuất</button>
                 </div>
             </div>
         </header>
 
         <!-- Nội dung chính -->
         <main class="max-w-7xl w-full mx-auto px-4 py-6 space-y-6 flex-1">
-            <!-- 4 Thẻ KPI -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-semibold uppercase text-slate-400">Tổng Thu Nhập</p>
-                    <p id="kpiIncome" class="text-2xl font-bold text-emerald-600 mt-1">0 ₫</p>
-                    <p class="text-xs text-slate-400 mt-1">Trong kỳ đang chọn</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-semibold uppercase text-slate-400">Tổng Chi Tiêu</p>
-                    <p id="kpiExpense" class="text-2xl font-bold text-rose-600 mt-1">0 ₫</p>
-                    <p class="text-xs text-slate-400 mt-1">Trong kỳ đang chọn</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-semibold uppercase text-slate-400">Số Dư Thực Tế</p>
-                    <p id="kpiBalance" class="text-2xl font-bold text-slate-800 mt-1">0 ₫</p>
-                    <p class="text-xs text-slate-400 mt-1">Thu nhập - Chi tiêu</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <p class="text-xs font-semibold uppercase text-slate-400">Tỷ Lệ Tiết Kiệm</p>
-                    <p id="kpiSavingRate" class="text-2xl font-bold text-teal-600 mt-1">0%</p>
-                    <p class="text-xs text-slate-400 mt-1">Mục tiêu khuyến nghị: ≥ 20%</p>
-                </div>
-            </div>
-
-            <!-- Khu vực Thêm Giao Dịch & Biểu Đồ -->
+            <!-- Khu vực Thêm Giao Dịch -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Form thêm giao dịch -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                    <h3 class="font-bold text-slate-800 text-base mb-4">➕ Ghi nhận giao dịch mới</h3>
-                    <form id="txForm" class="space-y-3.5">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                    <h3 class="font-bold text-slate-800 text-base mb-4">➕ Thêm Giao Dịch Cloud</h3>
+                    <form id="txForm" class="space-y-4">
                         <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
                             <button type="button" id="btnTypeExpense" onclick="setTxType('expense')" class="py-2 rounded-lg text-xs font-bold bg-rose-600 text-white shadow transition">Khoản Chi (-)</button>
                             <button type="button" id="btnTypeIncome" onclick="setTxType('income')" class="py-2 rounded-lg text-xs font-bold text-slate-600 transition">Khoản Thu (+)</button>
@@ -168,96 +100,54 @@
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Số tiền (VNĐ)</label>
-                            <input type="number" id="txAmount" required min="1000" step="1000" placeholder="Ví dụ: 500000" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-semibold focus:border-emerald-500 focus:outline-none">
-                            <div class="flex flex-wrap gap-1.5 mt-2">
-                                <button type="button" onclick="quickAmount(50000)" class="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 rounded-md font-medium">+50k</button>
-                                <button type="button" onclick="quickAmount(100000)" class="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 rounded-md font-medium">+100k</button>
-                                <button type="button" onclick="quickAmount(500000)" class="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 rounded-md font-medium">+500k</button>
-                                <button type="button" onclick="quickAmount(1000000)" class="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 rounded-md font-medium">+1 Triệu</button>
-                            </div>
+                            <input type="number" id="txAmount" required min="1000" step="1000" placeholder="Ví dụ: 500000" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold focus:border-emerald-500 focus:outline-none">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2.5">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-500 mb-1">Danh mục</label>
-                                <select id="txCategory" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white"></select>
+                                <select id="txCategory" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-white"></select>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-500 mb-1">Thành viên</label>
-                                <select id="txMember" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white">
+                                <select id="txMember" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-white">
                                     <option value="Quỹ Chung">🏠 Quỹ Chung</option>
                                     <option value="Bố">👨 Bố</option>
                                     <option value="Mẹ">👩 Mẹ</option>
                                     <option value="Con cái">🧒 Con cái</option>
-                                    <option value="Ông Bà">👴 Ông Bà</option>
                                 </select>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Ngày giao dịch</label>
-                            <input type="date" id="txDate" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium">
-                        </div>
-
-                        <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Ghi chú</label>
-                            <input type="text" id="txNote" placeholder="Ví dụ: Tiền điện tháng này, Lương..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs">
+                            <input type="text" id="txNote" placeholder="Ví dụ: Mua đồ ăn, lương tháng..." required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs">
                         </div>
 
-                        <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow transition">
-                            💾 Lưu Giao Dịch
+                        <button type="submit" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow transition">
+                            ☁️ Đẩy lên Cloud
                         </button>
                     </form>
                 </div>
 
-                <!-- 2 Biểu đồ -->
-                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col">
-                        <h3 class="font-bold text-slate-800 text-sm mb-3">🍩 Cơ cấu Chi tiêu theo Danh mục</h3>
-                        <div class="flex-1 flex items-center justify-center min-h-[240px]">
-                            <canvas id="expenseChart"></canvas>
-                        </div>
+                <!-- Lịch sử giao dịch -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col">
+                    <h3 class="font-bold text-slate-800 text-base mb-4">📋 Lịch sử đồng bộ thời gian thực</h3>
+                    <div class="flex-1 overflow-auto max-h-[400px]">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="sticky top-0 bg-white">
+                                <tr class="border-b border-slate-200 text-[11px] uppercase text-slate-400">
+                                    <th class="py-2.5 px-3">Danh mục</th>
+                                    <th class="py-2.5 px-3">Ghi chú</th>
+                                    <th class="py-2.5 px-3">Thành viên</th>
+                                    <th class="py-2.5 px-3 text-right">Số tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="txTableBody" class="divide-y divide-slate-100 text-xs">
+                                <!-- Dữ liệu sẽ đổ vào đây -->
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col">
-                        <h3 class="font-bold text-slate-800 text-sm mb-3">📊 Thu - Chi theo Thành viên</h3>
-                        <div class="flex-1 flex items-center justify-center min-h-[240px]">
-                            <canvas id="memberChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Danh sách Lịch sử Giao dịch -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                    <h3 class="font-bold text-slate-800 text-base">📋 Lịch sử giao dịch chi tiết</h3>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <input type="text" id="searchInput" oninput="renderApp()" placeholder="🔍 Tìm ghi chú, danh mục..." class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs">
-                        <select id="filterMember" onchange="renderApp()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white">
-                            <option value="ALL">Tất cả thành viên</option>
-                            <option value="Quỹ Chung">Quỹ Chung</option>
-                            <option value="Bố">Bố</option>
-                            <option value="Mẹ">Mẹ</option>
-                            <option value="Con cái">Con cái</option>
-                            <option value="Ông Bà">Ông Bà</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-200 text-[11px] uppercase text-slate-400">
-                                <th class="py-2.5 px-3">Ngày</th>
-                                <th class="py-2.5 px-3">Danh mục</th>
-                                <th class="py-2.5 px-3">Ghi chú</th>
-                                <th class="py-2.5 px-3">Thành viên</th>
-                                <th class="py-2.5 px-3 text-right">Số tiền</th>
-                                <th class="py-2.5 px-3 text-center">Xóa</th>
-                            </tr>
-                        </thead>
-                        <tbody id="txTableBody" class="divide-y divide-slate-100 text-xs"></tbody>
-                    </table>
                 </div>
             </div>
         </main>
@@ -278,78 +168,76 @@
             getFirestore, 
             collection, 
             addDoc, 
-            deleteDoc, 
             doc, 
             onSnapshot, 
             query,
+            orderBy,
             setDoc,
             getDoc
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 1. CẤU HÌNH FIREBASE CỦA BẠN (ĐÃ ĐIỀN SẴN CHÍNH XÁC)
+        // CẤU HÌNH CỦA BẠN (MÃ ĐÃ ĐƯỢC MỞ KHÓA TỪ BƯỚC TRƯỚC)
         const YOUR_FIREBASE_CONFIG = {
             apiKey: "AIzaSyA3T3ieR1CCc8bn5Ahx4BTXLRWRv3FArzY",
             authDomain: "quanlichitieu-309d3.firebaseapp.com",
             projectId: "quanlichitieu-309d3",
             storageBucket: "quanlichitieu-309d3.firebasestorage.app",
             messagingSenderId: "781705621246",
-            appId: "1:781705621246:web:a090f5228eccb7ad4affaf",
-            measurementId: "G-RRHFY1N26E"
+            appId: "1:781705621246:web:a090f5228eccb7ad4affaf"
         };
 
+        // Khởi tạo các biến toàn cục
         let app, auth, db;
         let currentAuthMode = 'login';
         let currentTxType = 'expense';
         let currentUser = null;
-        let transactions = [];
         let unsubscribeFirestore = null;
-        let expenseChartInstance = null;
-        let memberChartInstance = null;
 
         const CATEGORIES = {
-            expense: ['Ăn uống & Đi chợ', 'Hóa đơn Điện/Nước/Net', 'Học phí & Con cái', 'Đi lại & Xăng xe', 'Y tế & Sức khỏe', 'Mua sắm gia đình', 'Hiếu hỉ & Đối ngoại', 'Chi phí khác'],
-            income: ['Lương chính', 'Thưởng & Phụ cấp', 'Kinh doanh / Làm thêm', 'Lãi tiết kiệm / Đầu tư', 'Thu nhập khác']
+            expense: ['Ăn uống', 'Hóa đơn', 'Học phí', 'Mua sắm', 'Khác'],
+            income: ['Lương chính', 'Thưởng', 'Kinh doanh', 'Khác']
         };
 
-        // Khởi tạo ngày & tháng mặc định
-        const todayStr = new Date().toISOString().split('T')[0];
-        document.getElementById('txDate').value = todayStr;
-        document.getElementById('monthFilter').value = todayStr.slice(0, 7);
-        document.getElementById('monthFilter').addEventListener('change', () => renderApp());
-
-        // Khởi tạo Firebase
+        // Khởi tạo Firebase ngay lập tức
         try {
             app = initializeApp(YOUR_FIREBASE_CONFIG);
             auth = getAuth(app);
             db = getFirestore(app);
-            document.getElementById('connDot').className = 'w-2 h-2 rounded-full bg-emerald-400';
-            document.getElementById('connText').textContent = 'Đã kết nối Firebase Cloud (quanlichitieu-309d3)';
+            
+            document.getElementById('connDot').className = 'w-2 h-2 rounded-full bg-emerald-500';
+            document.getElementById('connText').textContent = 'Kết nối Cloud Firebase thành công';
+            document.getElementById('connText').className = 'text-emerald-700 font-bold';
 
+            // Theo dõi trạng thái đăng nhập
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
-                    const savedName = localStorage.getItem(`fam_name_${user.uid}`) || user.displayName || 'Quỹ Gia Đình';
-                    enterDashboard({
-                        uid: user.uid,
-                        email: user.email || 'demo@finfamily.vn',
-                        familyName: savedName,
-                        isCloud: true
-                    });
+                    let familyName = user.displayName || 'Quỹ Gia Đình';
+                    // Thử lấy tên gia đình từ Database nếu có
+                    try {
+                        const profileSnap = await getDoc(doc(db, 'family_profiles', user.uid));
+                        if (profileSnap.exists() && profileSnap.data().familyName) {
+                            familyName = profileSnap.data().familyName;
+                        }
+                    } catch (e) {}
+
+                    enterDashboard(user.uid, user.email, familyName);
+                } else {
+                    document.getElementById('appScreen').classList.add('hidden');
+                    document.getElementById('authScreen').classList.remove('hidden');
                 }
             });
-        } catch (err) {
-            console.warn("Chuyển sang chế độ Hybrid Local:", err);
-            document.getElementById('connDot').className = 'w-2 h-2 rounded-full bg-amber-400';
-            document.getElementById('connText').textContent = 'Chế độ Hybrid (Bảo mật trình duyệt)';
+        } catch (error) {
+            document.getElementById('connDot').className = 'w-2 h-2 rounded-full bg-rose-500';
+            document.getElementById('connText').textContent = 'Lỗi cấu hình: ' + error.message;
+            document.getElementById('connText').className = 'text-rose-600 font-bold';
         }
 
-        // Chuyển đổi tab Đăng nhập / Đăng ký
+        // Chuyển tab Đăng ký / Đăng nhập
         window.switchAuthTab = function(mode) {
             currentAuthMode = mode;
             const isReg = mode === 'register';
             document.getElementById('familyNameGroup').classList.toggle('hidden', !isReg);
-            document.getElementById('confirmPassGroup').classList.toggle('hidden', !isReg);
-            document.getElementById('authTitle').textContent = isReg ? 'Tạo tài khoản Gia đình' : 'Đăng nhập Quỹ Gia đình';
-            document.getElementById('authSubmitBtn').textContent = isReg ? 'Đăng ký & Khởi tạo Quỹ →' : 'Đăng nhập vào Quỹ →';
+            document.getElementById('authSubmitBtn').innerHTML = isReg ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
 
             document.getElementById('tabLoginBtn').className = !isReg
                 ? 'py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition'
@@ -363,164 +251,100 @@
         function showAlert(msg, isError = true) {
             const box = document.getElementById('authAlert');
             box.textContent = msg;
-            box.className = `mb-4 p-3 rounded-xl text-xs font-medium border ${
-                isError ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            box.className = `mb-4 p-3 rounded-xl text-xs font-bold border text-center ${
+                isError ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
             }`;
             box.classList.remove('hidden');
         }
-        function hideAlert() {
-            document.getElementById('authAlert').classList.add('hidden');
-        }
+        function hideAlert() { document.getElementById('authAlert').classList.add('hidden'); }
 
-        // Xử lý Submit Đăng nhập / Đăng ký
+        // BẮT BUỘC ĐĂNG KÝ VÀO FIREBASE
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             hideAlert();
 
-            const email = document.getElementById('authEmail').value.trim().toLowerCase();
+            const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value;
-            const familyName = document.getElementById('authFamilyName').value.trim() || 'Quỹ Gia đình ' + email.split('@')[0];
-            const confirmPass = document.getElementById('authConfirmPassword').value;
-
-            if (currentAuthMode === 'register' && password !== confirmPass) {
-                return showAlert('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!');
-            }
-
+            const familyName = document.getElementById('authFamilyName').value.trim() || 'Quỹ Gia Đình';
             const btn = document.getElementById('authSubmitBtn');
+
             btn.disabled = true;
-            btn.textContent = 'Đang xử lý bảo mật...';
+            btn.innerHTML = `<div class="w-4 h-4 border-2 border-white rounded-full loader border-r-transparent"></div> Đang xử lý...`;
 
             try {
                 if (currentAuthMode === 'register') {
-                    const cred = await createUserWithEmailAndPassword(auth, email, password);
-                    localStorage.setItem(`fam_name_${cred.user.uid}`, familyName);
-                    try { await updateProfile(cred.user, { displayName: familyName }); } catch (_) {}
+                    // Đăng ký trực tiếp lên Cloud
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    
+                    // Cập nhật Profile
+                    try { await updateProfile(userCredential.user, { displayName: familyName }); } catch (_) {}
+                    
+                    // Thử tạo Profile trên Database (Nếu chưa cấp Rules thì sẽ báo lỗi ngầm, nhưng Auth vẫn thành công)
                     try {
-                        await setDoc(doc(db, 'family_profiles', cred.user.uid), {
+                        await setDoc(doc(db, 'family_profiles', userCredential.user.uid), {
                             familyName, email, createdAt: new Date().toISOString()
                         });
-                    } catch (_) {}
+                    } catch (dbErr) {
+                        console.warn("Chưa cấp quyền Firestore Rules, nhưng Tài khoản Auth đã tạo thành công!", dbErr);
+                    }
+                    
+                    showAlert('Đăng ký thành công! Đang chuyển vào trang chính...', false);
                 } else {
+                    // Đăng nhập
                     await signInWithEmailAndPassword(auth, email, password);
                 }
-            } catch (err) {
-                console.warn("Chi tiết phản hồi từ Firebase Auth:", err.code, err.message);
-
-                // Nếu lỗi do sai mật khẩu hoặc email đã tồn tại trên Firebase
-                if (err.code === 'auth/email-already-in-use') {
-                    btn.disabled = false;
-                    btn.textContent = 'Đăng ký & Khởi tạo Quỹ →';
-                    return showAlert('Email này đã được đăng ký! Bạn hãy bấm sang tab "Đăng nhập" nhé.');
+            } catch (error) {
+                // HIỂN THỊ LỖI FIREBASE THỰC TẾ (KHÔNG CÓ FALLBACK OFFLINE)
+                console.error("Lỗi từ Firebase:", error);
+                if (error.code === 'auth/email-already-in-use') {
+                    showAlert('❌ Email này đã được tạo trên Cloud! Vui lòng chuyển sang tab Đăng nhập.');
+                } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                    showAlert('❌ Sai email hoặc mật khẩu. Vui lòng thử lại!');
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    showAlert('❌ Dịch vụ Email/Password chưa được bật trên Firebase Console của bạn!');
+                } else {
+                    showAlert(`❌ Lỗi Firebase: ${error.message}`);
                 }
-                if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-                    btn.disabled = false;
-                    btn.textContent = 'Đăng nhập vào Quỹ →';
-                    return showAlert('Email hoặc mật khẩu chưa chính xác. Vui lòng thử lại.');
-                }
-
-                // CƠ CHẾ HYBRID DỰ PHÒNG: Nếu Firebase Console chưa bật Email/Password hoặc chặn tên miền,
-                // tự động xác thực qua Kho bảo mật nội bộ để bạn vào sử dụng ngay lập tức!
-                handleHybridLocalAuth(email, password, familyName);
             } finally {
                 btn.disabled = false;
+                btn.innerHTML = currentAuthMode === 'register' ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
             }
         });
 
-        function handleHybridLocalAuth(email, password, familyName) {
-            const accounts = JSON.parse(localStorage.getItem('finfamily_local_accounts') || '{}');
-            if (currentAuthMode === 'register') {
-                accounts[email] = { password, familyName, uid: 'local_' + btoa(email).replace(/=/g, '') };
-                localStorage.setItem('finfamily_local_accounts', JSON.stringify(accounts));
-                enterDashboard({ uid: accounts[email].uid, email, familyName, isCloud: false });
-            } else {
-                if (accounts[email] && accounts[email].password === password) {
-                    enterDashboard({ uid: accounts[email].uid, email, familyName: accounts[email].familyName, isCloud: false });
-                } else {
-                    // Nếu chưa có trong local, khởi tạo nhanh để không chặn người dùng
-                    const uid = 'local_' + btoa(email).replace(/=/g, '');
-                    accounts[email] = { password, familyName: 'Quỹ Gia Đình (' + email.split('@')[0] + ')', uid };
-                    localStorage.setItem('finfamily_local_accounts', JSON.stringify(accounts));
-                    enterDashboard({ uid, email, familyName: accounts[email].familyName, isCloud: false });
-                }
-            }
-        }
-
-        // Đăng nhập nhanh Tài khoản Mẫu
-        window.loginDemoAccount = function() {
-            const demoUid = 'demo_family_vault';
-            const existing = localStorage.getItem(`txs_${demoUid}`);
-            if (!existing) {
-                const ym = new Date().toISOString().slice(0, 7);
-                const sampleData = [
-                    { id: '1', type: 'income', amount: 25000000, category: 'Lương chính', member: 'Bố', date: `${ym}-05`, note: 'Lương tháng' },
-                    { id: '2', type: 'income', amount: 18000000, category: 'Lương chính', member: 'Mẹ', date: `${ym}-06`, note: 'Lương & phụ cấp' },
-                    { id: '3', type: 'expense', amount: 6500000, category: 'Ăn uống & Đi chợ', member: 'Mẹ', date: `${ym}-08`, note: 'Tiền chợ & siêu thị' },
-                    { id: '4', type: 'expense', amount: 1850000, category: 'Hóa đơn Điện/Nước/Net', member: 'Quỹ Chung', date: `${ym}-10`, note: 'Điện, nước, cáp quang' },
-                    { id: '5', type: 'expense', amount: 4200000, category: 'Học phí & Con cái', member: 'Con cái', date: `${ym}-12`, note: 'Học phí & tiếng Anh' }
-                ];
-                localStorage.setItem(`txs_${demoUid}`, JSON.stringify(sampleData));
-            }
-            enterDashboard({
-                uid: demoUid,
-                email: 'gia-dinh-mau@finfamily.vn',
-                familyName: 'Quỹ Gia Đình Mẫu',
-                isCloud: false
-            });
-        };
-
-        // Vào màn hình chính & đồng bộ dữ liệu
-        async function enterDashboard(userObj) {
-            currentUser = userObj;
+        // Hàm vào màn hình chính
+        function enterDashboard(uid, email, familyName) {
+            currentUser = { uid, email, familyName };
             document.getElementById('authScreen').classList.add('hidden');
             document.getElementById('appScreen').classList.remove('hidden');
-            document.getElementById('headerFamilyName').textContent = userObj.familyName;
-            document.getElementById('headerUserEmail').textContent = userObj.email;
-            document.getElementById('syncBadge').textContent = userObj.isCloud ? '● Đồng bộ Cloud Firebase' : '● Lưu trữ Hybrid An toàn';
+            
+            document.getElementById('headerFamilyName').textContent = familyName;
+            document.getElementById('headerUserEmail').textContent = email;
 
-            // Tải dữ liệu dự phòng từ trình duyệt trước
-            const cached = localStorage.getItem(`txs_${userObj.uid}`);
-            transactions = cached ? JSON.parse(cached) : [];
-            renderApp();
-
-            // Nếu có kết nối Firebase Cloud, lắng nghe Firestore thời gian thực
-            if (userObj.isCloud && db) {
-                try {
-                    const profileSnap = await getDoc(doc(db, 'family_profiles', userObj.uid));
-                    if (profileSnap.exists() && profileSnap.data().familyName) {
-                        document.getElementById('headerFamilyName').textContent = profileSnap.data().familyName;
-                    }
-                } catch (_) {}
-
-                if (unsubscribeFirestore) unsubscribeFirestore();
-                try {
-                    const q = query(collection(db, 'families', userObj.uid, 'transactions'));
-                    unsubscribeFirestore = onSnapshot(q, (snapshot) => {
-                        const cloudTxs = [];
-                        snapshot.forEach(d => cloudTxs.push({ id: d.id, ...d.data() }));
-                        if (cloudTxs.length > 0 || transactions.length === 0) {
-                            transactions = cloudTxs;
-                            localStorage.setItem(`txs_${userObj.uid}`, JSON.stringify(transactions));
-                            renderApp();
-                        }
-                    }, (err) => {
-                        console.warn("Firestore chưa mở Rules, đang dùng bộ nhớ Hybrid:", err.message);
-                    });
-                } catch (e) {
-                    console.warn("Bỏ qua đồng bộ Firestore:", e);
-                }
+            // Lắng nghe dữ liệu thời gian thực từ Firestore
+            if (unsubscribeFirestore) unsubscribeFirestore();
+            
+            try {
+                const q = query(collection(db, 'families', uid, 'transactions'), orderBy('createdAt', 'desc'));
+                unsubscribeFirestore = onSnapshot(q, (snapshot) => {
+                    const txs = [];
+                    snapshot.forEach(doc => txs.push({ id: doc.id, ...doc.data() }));
+                    renderTable(txs);
+                }, (error) => {
+                    console.error("Lỗi lấy dữ liệu (Kiểm tra lại Firestore Rules):", error);
+                    document.getElementById('txTableBody').innerHTML = `<tr><td colspan="4" class="py-6 text-center text-rose-500 font-bold">❌ Không thể lấy dữ liệu: Bạn chưa cài đặt Firebase Database Rules!</td></tr>`;
+                });
+            } catch (error) {
+                console.error("Lỗi khởi tạo truy vấn:", error);
             }
         }
 
         // Đăng xuất
         window.handleLogout = async function() {
             if (unsubscribeFirestore) unsubscribeFirestore();
-            try { if (auth && auth.currentUser) await signOut(auth); } catch (_) {}
-            currentUser = null;
-            document.getElementById('appScreen').classList.add('hidden');
-            document.getElementById('authScreen').classList.remove('hidden');
+            await signOut(auth);
         };
 
-        // Chọn loại giao dịch Thu / Chi
+        // UI Form nhập liệu
         window.setTxType = function(type) {
             currentTxType = type;
             const isExp = type === 'expense';
@@ -530,182 +354,61 @@
             document.getElementById('btnTypeIncome').className = !isExp
                 ? 'py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow transition'
                 : 'py-2 rounded-lg text-xs font-bold text-slate-600 transition';
-
-            const catSelect = document.getElementById('txCategory');
-            catSelect.innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('txCategory').innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
         };
         setTxType('expense');
 
-        window.quickAmount = function(val) {
-            const input = document.getElementById('txAmount');
-            input.value = (Number(input.value) || 0) + val;
-        };
-
-        // Thêm giao dịch mới
+        // Đẩy giao dịch lên Cloud
         document.getElementById('txForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser) return;
 
             const newTx = {
-                id: 'tx_' + Date.now(),
                 type: currentTxType,
                 amount: Number(document.getElementById('txAmount').value),
                 category: document.getElementById('txCategory').value,
                 member: document.getElementById('txMember').value,
-                date: document.getElementById('txDate').value,
-                note: document.getElementById('txNote').value.trim() || document.getElementById('txCategory').value,
+                note: document.getElementById('txNote').value,
                 createdAt: new Date().toISOString()
             };
 
-            // Lưu ngay vào mảng & LocalStorage
-            transactions.unshift(newTx);
-            localStorage.setItem(`txs_${currentUser.uid}`, JSON.stringify(transactions));
-            renderApp();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = "Đang đẩy dữ liệu...";
 
-            // Reset form
-            document.getElementById('txAmount').value = '';
-            document.getElementById('txNote').value = '';
-
-            // Đồng bộ lên Cloud Firestore nếu khả dụng
-            if (currentUser.isCloud && db) {
-                try {
-                    await addDoc(collection(db, 'families', currentUser.uid, 'transactions'), newTx);
-                } catch (err) {
-                    console.warn("Đã lưu an toàn trên máy (Firestore chưa mở quyền ghi):", err.message);
-                }
+            try {
+                await addDoc(collection(db, 'families', currentUser.uid, 'transactions'), newTx);
+                document.getElementById('txAmount').value = '';
+                document.getElementById('txNote').value = '';
+            } catch (error) {
+                alert("❌ Lỗi lưu dữ liệu: Chắc chắn bạn đã xuất bản Firestore Rules ở chế độ cho phép Write!");
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "☁️ Đẩy lên Cloud";
             }
         });
 
-        // Xóa giao dịch
-        window.deleteTx = async function(id) {
-            if (!currentUser) return;
-            transactions = transactions.filter(t => t.id !== id);
-            localStorage.setItem(`txs_${currentUser.uid}`, JSON.stringify(transactions));
-            renderApp();
+        function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫'; }
 
-            if (currentUser.isCloud && db) {
-                try {
-                    await deleteDoc(doc(db, 'families', currentUser.uid, 'transactions', id));
-                } catch (_) {}
-            }
-        };
-
-        // Định dạng tiền VNĐ
-        function formatVND(n) {
-            return new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫';
-        }
-
-        // Hiển thị dữ liệu & Vẽ biểu đồ
-        window.renderApp = function() {
-            const selectedMonth = document.getElementById('monthFilter').value;
-            const searchKey = (document.getElementById('searchInput').value || '').toLowerCase();
-            const memberFilter = document.getElementById('filterMember').value;
-
-            const filtered = transactions.filter(t => {
-                const matchMonth = !selectedMonth || (t.date && t.date.startsWith(selectedMonth));
-                const matchMember = memberFilter === 'ALL' || t.member === memberFilter;
-                const matchSearch = !searchKey || 
-                    (t.note && t.note.toLowerCase().includes(searchKey)) || 
-                    (t.category && t.category.toLowerCase().includes(searchKey));
-                return matchMonth && matchMember && matchSearch;
-            }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-
-            let totalIncome = 0, totalExpense = 0;
-            filtered.forEach(t => {
-                if (t.type === 'income') totalIncome += Number(t.amount);
-                else totalExpense += Number(t.amount);
-            });
-
-            const balance = totalIncome - totalExpense;
-            const savingRate = totalIncome > 0 ? Math.max(0, Math.round((balance / totalIncome) * 100)) : 0;
-
-            document.getElementById('kpiIncome').textContent = formatVND(totalIncome);
-            document.getElementById('kpiExpense').textContent = formatVND(totalExpense);
-            document.getElementById('kpiBalance').textContent = formatVND(balance);
-            document.getElementById('kpiSavingRate').textContent = savingRate + '%';
-
-            // Render bảng
+        // Render Bảng giao dịch
+        function renderTable(data) {
             const tbody = document.getElementById('txTableBody');
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Chưa có giao dịch nào trong kỳ này. Hãy thêm giao dịch mới ở khung bên trái!</td></tr>`;
-            } else {
-                tbody.innerHTML = filtered.map(t => `
-                    <tr class="hover:bg-slate-50">
-                        <td class="py-2.5 px-3 font-medium text-slate-600">${t.date}</td>
-                        <td class="py-2.5 px-3 font-semibold text-slate-800">${t.category}</td>
-                        <td class="py-2.5 px-3 text-slate-500">${t.note || '-'}</td>
-                        <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium">${t.member}</span></td>
-                        <td class="py-2.5 px-3 text-right font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
-                            ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
-                        </td>
-                        <td class="py-2.5 px-3 text-center">
-                            <button onclick="deleteTx('${t.id}')" class="text-rose-500 hover:text-rose-700 font-bold px-2">✕</button>
-                        </td>
-                    </tr>
-                `).join('');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400 font-medium">Chưa có dữ liệu nào trên Cloud. Hãy thêm giao dịch đầu tiên!</td></tr>`;
+                return;
             }
-
-            updateCharts(filtered);
-        };
-
-        function updateCharts(data) {
-            // 1. Biểu đồ tròn Chi tiêu
-            const expMap = {};
-            data.filter(t => t.type === 'expense').forEach(t => {
-                expMap[t.category] = (expMap[t.category] || 0) + Number(t.amount);
-            });
-            const expLabels = Object.keys(expMap);
-            const expValues = Object.values(expMap);
-
-            if (expenseChartInstance) expenseChartInstance.destroy();
-            const ctx1 = document.getElementById('expenseChart').getContext('2d');
-            expenseChartInstance = new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: expLabels.length ? expLabels : ['Chưa có chi tiêu'],
-                    datasets: [{
-                        data: expValues.length ? expValues : [1],
-                        backgroundColor: expValues.length 
-                            ? ['#f43f5e', '#fb923c', '#eab308', '#10b981', '#06b6d4', '#6366f1', '#a855f7', '#64748b']
-                            : ['#e2e8f0']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-            });
-
-            // 2. Biểu đồ cột theo Thành viên
-            const members = ['Quỹ Chung', 'Bố', 'Mẹ', 'Con cái', 'Ông Bà'];
-            const incByMem = members.map(m => data.filter(t => t.member === m && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
-            const expByMem = members.map(m => data.filter(t => t.member === m && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
-
-            if (memberChartInstance) memberChartInstance.destroy();
-            const ctx2 = document.getElementById('memberChart').getContext('2d');
-            memberChartInstance = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: members,
-                    datasets: [
-                        { label: 'Thu nhập', data: incByMem, backgroundColor: '#10b981', borderRadius: 6 },
-                        { label: 'Chi tiêu', data: expByMem, backgroundColor: '#f43f5e', borderRadius: 6 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-            });
+            tbody.innerHTML = data.map(t => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-3 px-3 font-bold text-slate-800">${t.category}</td>
+                    <td class="py-3 px-3 text-slate-600 font-medium">${t.note}</td>
+                    <td class="py-3 px-3"><span class="px-2 py-1 rounded-md bg-slate-100 text-slate-700 font-semibold text-[11px]">${t.member}</span></td>
+                    <td class="py-3 px-3 text-right font-bold text-[13px] ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
+                        ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
+                    </td>
+                </tr>
+            `).join('');
         }
-
-        // Xuất file CSV/Excel
-        window.exportCSV = function() {
-            if (!transactions.length) return alert('Chưa có giao dịch nào để xuất!');
-            let csv = '\uFEFFNgày,Loại,Danh mục,Thành viên,Số tiền,Ghi chú\n';
-            transactions.forEach(t => {
-                csv += `${t.date},${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'},"${t.category}","${t.member}",${t.amount},"${t.note || ''}"\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `Bao_cao_dong_tien_${new Date().toISOString().slice(0,10)}.csv`;
-            link.click();
-        };
     </script>
 </body>
 </html>
