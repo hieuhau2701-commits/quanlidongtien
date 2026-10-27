@@ -3,37 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinFamily Cloud - Quản Lý Dòng Tiền & Tài Khoản Ngân Hàng</title>
+    <title>FinFamily Cloud - Quản Lý Dòng Tiền & Giải Ngân</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 0; box-sizing: border-box; }
-        .loader { border-top-color: #10b981; animation: spinner 1s linear infinite; border-width: 2px; border-style: solid; border-radius: 50%; width: 1rem; height: 1rem; display: inline-block; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col text-slate-800">
+<body>
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ (Mặc định hiển thị flex để không bao giờ bị trắng trang) -->
+    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
     <div id="authScreen" style="background: #1e293b; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; position: fixed; inset: 0; z-index: 50;">
         <div style="max-width: 400px; width: 100%; background: #ffffff; border-radius: 24px; padding: 32px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);">
             <div style="text-align: center; margin-bottom: 24px;">
                 <div style="width: 56px; height: 56px; margin: 0 auto 16px auto; background: #10b981; color: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">₫</div>
                 <h1 style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0;">FinFamily Cloud</h1>
-                <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Quản lý Dòng tiền & Tài khoản Ngân hàng</p>
+                <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Quản lý Dòng tiền & Giải ngân Quỹ Gia đình</p>
                 <div style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 9999px; background: #f1f5f9; font-size: 11px;">
                     <span id="connDot" style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; display: inline-block;"></span>
-                    <span id="connText" style="color: #475569; font-weight: 500;">Đang khởi tạo kết nối...</span>
+                    <span id="connText" style="color: #475569; font-weight: 500;">Đang kết nối...</span>
                 </div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 24px;">
-                <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: #ffffff; color: #1e293b; border: none; cursor: pointer; transition: 0.2s;">Đăng nhập</button>
-                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: transparent; color: #64748b; border: none; cursor: pointer; transition: 0.2s;">Đăng ký mới</button>
+                <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: #ffffff; color: #1e293b; border: none; cursor: pointer;">Đăng nhập</button>
+                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: transparent; color: #64748b; border: none; cursor: pointer;">Đăng ký mới</button>
             </div>
 
             <div id="authAlert" style="display: none; margin-bottom: 16px; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: bold; text-align: center;"></div>
@@ -59,7 +57,7 @@
     </div>
 
     <!-- MÀN HÌNH CHÍNH (DASHBOARD) -->
-    <div id="appScreen" style="display: none; flex: 1; flex-direction: column; min-height: 100vh;">
+    <div id="appScreen" style="display: none; flex: 1; flex-direction: column; min-height: 100vh; background-color: #f1f5f9;">
         <header style="background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 30; padding: 12px 16px;">
             <div style="max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -67,7 +65,7 @@
                     <div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <h1 id="headerFamilyName" style="font-weight: bold; font-size: 16px; margin: 0; color: #1e293b;">Quỹ Gia Đình</h1>
-                            <span style="padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 9999px; background: #d1fae5; color: #047857;">Đã đồng bộ Cloud</span>
+                            <span style="padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 9999px; background: #d1fae5; color: #047857;">Cloud Sync</span>
                         </div>
                         <p id="headerUserEmail" style="font-size: 12px; color: #64748b; margin: 0;">user@email.com</p>
                     </div>
@@ -104,13 +102,19 @@
 
             <!-- SỐ DƯ CHI TIẾT THEO TỪNG TÀI KHOẢN / NGÂN HÀNG -->
             <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
-                <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0 0 12px 0;">💳 Số dư thực tế theo từng tài khoản / ngân hàng / ví</h3>
-                <div id="accountBalancesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;"></div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0;">💳 Số dư thực tế theo tài khoản (Chỉ hiện tài khoản có tiền)</h3>
+                    <button onclick="toggleShowAllAccounts()" id="btnToggleAccounts" style="font-size: 12px; font-weight: 600; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; padding: 4px 12px; border-radius: 8px; cursor: pointer;">
+                        👁️ Xem tất cả ngân hàng
+                    </button>
+                </div>
+                <div id="accountBalancesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;"></div>
             </div>
 
-            <!-- Form & Biểu đồ -->
+            <!-- HÀNG 3 Ô TÍNH NĂNG CHÍNH -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-                <!-- Thêm giao dịch -->
+                
+                <!-- Ô 1: Ghi nhận giao dịch -->
                 <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
                     <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">➕ Ghi nhận giao dịch</h3>
                     <form id="txForm" style="display: flex; flex-direction: column; gap: 14px;">
@@ -122,12 +126,6 @@
                         <div>
                             <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Số tiền (VNĐ)</label>
                             <input type="number" id="txAmount" required min="1000" step="1000" placeholder="Ví dụ: 500000" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; font-weight: bold; box-sizing: border-box;">
-                            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
-                                <button type="button" onclick="quickAmount(50000)" style="padding: 4px 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">+50k</button>
-                                <button type="button" onclick="quickAmount(100000)" style="padding: 4px 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">+100k</button>
-                                <button type="button" onclick="quickAmount(500000)" style="padding: 4px 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">+500k</button>
-                                <button type="button" onclick="quickAmount(1000000)" style="padding: 4px 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">+1 Triệu</button>
-                            </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -136,7 +134,7 @@
                                 <select id="txCategory" style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;"></select>
                             </div>
                             <div>
-                                <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Nguồn tiền / Ngân hàng</label>
+                                <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Tài khoản / Ngân hàng</label>
                                 <select id="txAccount" style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;"></select>
                             </div>
                         </div>
@@ -147,31 +145,65 @@
                         </div>
 
                         <div>
-                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Ghi chú</label>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Ghi chú lý do</label>
                             <input type="text" id="txNote" required placeholder="Ví dụ: Tiền chợ, nhận lương..." style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; box-sizing: border-box;">
                         </div>
 
                         <button type="submit" style="width: 100%; padding: 12px; border-radius: 12px; background: #059669; color: white; font-weight: bold; font-size: 13px; border: none; cursor: pointer;">
-                            ☁️ Lưu lên Cloud
+                            ☁️ Lưu giao dịch
                         </button>
                     </form>
                 </div>
 
-                <!-- Biểu đồ -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-                    <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
-                        <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0 0 12px 0;">🍩 Cơ cấu Chi tiêu</h3>
-                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px; position: relative;">
-                            <canvas id="expenseChart"></canvas>
+                <!-- Ô 2: Cập nhật số dư thực tế hiện tại -->
+                <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); display: flex; flex-direction: column;">
+                    <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">📝 Cập nhật số dư thực tế</h3>
+                    <p style="font-size: 12px; color: #64748b; margin: 0 0 16px 0;">Điều chỉnh nhanh số dư tài khoản trùng khớp với thực tế trong app ngân hàng của bạn.</p>
+                    
+                    <form id="updateBalanceForm" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
+                        <div>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Chọn Ngân hàng / Tài khoản</label>
+                            <select id="adjAccount" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: white; box-sizing: border-box;"></select>
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Số dư thực tế mới (VNĐ)</label>
+                            <input type="number" id="adjNewBalance" required placeholder="Nhập số tiền chính xác hiện có" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; font-weight: bold; box-sizing: border-box;">
+                        </div>
+                        <button type="submit" style="width: 100%; padding: 12px; margin-top: auto; border-radius: 12px; background: #2563eb; color: white; font-weight: bold; font-size: 13px; border: none; cursor: pointer;">
+                            ⚡ Khớp số dư thực tế
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Ô 3: Xét duyệt giải ngân khoản chi & Tạo văn bản -->
+                <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); display: flex; flex-direction: column;">
+                    <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">⚖️ Xét duyệt giải ngân khoản chi</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Số tiền chi đề xuất (VNĐ)</label>
+                            <input type="number" id="apprAmount" oninput="processApproval()" placeholder="Ví dụ: 2000000" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; font-weight: bold; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Lý do chi giải ngân</label>
+                            <input type="text" id="apprReason" oninput="processApproval()" placeholder="Ví dụ: Thanh toán hóa đơn điện / mua đồ gia dụng..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Tài khoản đủ điều kiện trích tiền</label>
+                            <select id="apprSourceAcc" onchange="processApproval()" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; background: #f8fafc; font-weight: bold; box-sizing: border-box;"></select>
                         </div>
                     </div>
-                    <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
-                        <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0 0 12px 0;">📊 Thu - Chi theo Tài khoản</h3>
-                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px; position: relative;">
-                            <canvas id="accountChart"></canvas>
+
+                    <!-- Khung văn bản tờ trình giải ngân -->
+                    <div style="margin-top: 14px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 12px; font-size: 12px; color: #334155; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 10px; font-weight: bold; uppercase; color: #64748b;">📄 Mẫu Tờ Trình Xét Duyệt</span>
+                            <button onclick="copyApprovalDoc()" style="padding: 2px 8px; font-size: 10px; font-weight: bold; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer;">📋 Copy Tờ Trình</button>
                         </div>
+                        <pre id="approvalDocText" style="white-space: pre-wrap; font-family: inherit; margin: 0; font-size: 11px; line-height: 1.5; color: #1e293b;">Vui lòng nhập số tiền và lý do chi để tạo tờ trình...</pre>
                     </div>
                 </div>
+
             </div>
 
             <!-- Bảng lịch sử -->
@@ -217,7 +249,7 @@
         let auth = null, db = null, currentUser = null, unsubscribeFirestore = null;
         let currentAuthMode = 'login', currentTxType = 'expense';
         let transactions = [];
-        let expenseChartInstance = null, accountChartInstance = null;
+        let showAllAccounts = false;
 
         const ACCOUNT_ICONS = {
             'Tiền mặt': '💵',
@@ -242,15 +274,16 @@
         const ACCOUNT_LIST = Object.keys(ACCOUNT_ICONS);
 
         const CATEGORIES = {
-            expense: ['Ăn uống & Đi chợ', 'Hóa đơn Điện/Nước/Net', 'Học phí & Con cái', 'Đi lại & Xăng xe', 'Y tế & Sức khỏe', 'Mua sắm gia đình', 'Chi phí khác'],
-            income: ['Lương chính', 'Thưởng & Phụ cấp', 'Kinh doanh / Làm thêm', 'Lãi tiết kiệm / Đầu tư', 'Thu nhập khác']
+            expense: ['Ăn uống & Đi chợ', 'Hóa đơn Điện/Nước/Net', 'Học phí & Con cái', 'Đi lại & Xăng xe', 'Y tế & Sức khỏe', 'Mua sắm gia đình', 'Cập nhật số dư', 'Chi phí khác'],
+            income: ['Lương chính', 'Thưởng & Phụ cấp', 'Kinh doanh / Làm thêm', 'Lãi tiết kiệm / Đầu tư', 'Cập nhật số dư', 'Thu nhập khác']
         };
 
         function initAccountSelects() {
             try {
                 const txSelect = document.getElementById('txAccount');
                 const filterSelect = document.getElementById('filterAccount');
-                if (!txSelect || !filterSelect) return;
+                const adjSelect = document.getElementById('adjAccount');
+                if (!txSelect || !filterSelect || !adjSelect) return;
                 
                 let txOptions = '';
                 let filterOptions = '<option value="ALL">Tất cả tài khoản / Ngân hàng</option>';
@@ -263,10 +296,10 @@
                 
                 txSelect.innerHTML = txOptions;
                 filterSelect.innerHTML = filterOptions;
+                adjSelect.innerHTML = txOptions;
             } catch (e) { console.error("Init selects error:", e); }
         }
 
-        // Khởi tạo các giá trị mặc định ngay lập tức
         window.addEventListener('DOMContentLoaded', () => {
             initAccountSelects();
             const todayStr = new Date().toISOString().split('T')[0];
@@ -322,12 +355,14 @@
             }
         }
 
-        function quickAmount(val) {
-            const input = document.getElementById('txAmount');
-            if (input) input.value = (Number(input.value) || 0) + val;
+        function toggleShowAllAccounts() {
+            showAllAccounts = !showAllAccounts;
+            const btn = document.getElementById('btnToggleAccounts');
+            if (btn) btn.textContent = showAllAccounts ? "🙈 Ẩn bớt ngân hàng 0đ" : "👁️ Xem tất cả ngân hàng";
+            renderApp();
         }
 
-        // Khởi tạo Firebase an toàn tuyệt đối
+        // Cấu hình Firebase
         try {
             if (typeof firebase === 'undefined') throw new Error("Mạng đang chặn CDN Firebase.");
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -447,16 +482,14 @@
             } catch (e) { console.error("Logout error:", e); }
         }
 
+        // Lưu giao dịch thu chi thường
         const txForm = document.getElementById('txForm');
         if (txForm) {
             txForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (!currentUser || !db) return;
                 const btn = e.target.querySelector('button[type="submit"]');
-                if (btn) {
-                    btn.disabled = true;
-                    btn.textContent = "Đang lưu...";
-                }
+                if (btn) { btn.disabled = true; btn.textContent = "Đang lưu..."; }
 
                 const amountEl = document.getElementById('txAmount');
                 const catEl = document.getElementById('txCategory');
@@ -482,10 +515,57 @@
                 } catch (err) {
                     alert("❌ Lỗi lưu dữ liệu: Hãy kiểm tra quyền Firestore Rules!");
                 } finally {
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.textContent = "☁️ Lưu lên Cloud";
+                    if (btn) { btn.disabled = false; btn.textContent = "☁️ Lưu giao dịch"; }
+                }
+            });
+        }
+
+        // Cập nhật số dư thực tế nhanh
+        const updateBalanceForm = document.getElementById('updateBalanceForm');
+        if (updateBalanceForm) {
+            updateBalanceForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentUser || !db) return;
+
+                const targetAcc = document.getElementById('adjAccount').value;
+                const targetBalance = Number(document.getElementById('adjNewBalance').value);
+                if (isNaN(targetBalance)) return;
+
+                // Tính số dư hiện tại trên mây của tài khoản này
+                let currentBal = 0;
+                transactions.forEach(t => {
+                    const acc = t.member || 'Tiền mặt';
+                    if (acc === targetAcc) {
+                        if (t.type === 'income') currentBal += Number(t.amount);
+                        else currentBal -= Number(t.amount);
                     }
+                });
+
+                const diff = targetBalance - currentBal;
+                if (diff === 0) return alert('Số dư hiện tại trên web đã trùng khớp với số tiền này!');
+
+                const btn = e.target.querySelector('button[type="submit"]');
+                if (btn) { btn.disabled = true; btn.textContent = "Đang điều chỉnh..."; }
+
+                const todayStr = new Date().toISOString().split('T')[0];
+                const adjTx = {
+                    type: diff > 0 ? 'income' : 'expense',
+                    amount: Math.abs(diff),
+                    category: 'Cập nhật số dư',
+                    member: targetAcc,
+                    date: todayStr,
+                    note: `Điều chỉnh số dư thực tế về ${formatVND(targetBalance)}`,
+                    createdAt: new Date().toISOString()
+                };
+
+                try {
+                    await db.collection('families').doc(currentUser.uid).collection('transactions').add(adjTx);
+                    document.getElementById('adjNewBalance').value = '';
+                    alert(`✓ Đã khớp số dư ${targetAcc} thành ${formatVND(targetBalance)}`);
+                } catch (err) {
+                    alert("❌ Không thể cập nhật số dư: " + err.message);
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = "⚡ Khớp số dư thực tế"; }
                 }
             });
         }
@@ -500,6 +580,20 @@
         }
 
         function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫'; }
+
+        // Tính toán toàn bộ số dư và hiển thị
+        function calculateBalances() {
+            const accBalances = {};
+            ACCOUNT_LIST.forEach(acc => accBalances[acc] = 0);
+            transactions.forEach(t => {
+                const acc = t.member || 'Tiền mặt';
+                if (accBalances[acc] !== undefined) {
+                    if (t.type === 'income') accBalances[acc] += Number(t.amount);
+                    else accBalances[acc] -= Number(t.amount);
+                }
+            });
+            return accBalances;
+        }
 
         function renderApp() {
             try {
@@ -522,8 +616,12 @@
 
                 let inc = 0, exp = 0;
                 filtered.forEach(t => t.type === 'income' ? inc += Number(t.amount) : exp += Number(t.amount));
-                const bal = inc - exp;
-                const rate = inc > 0 ? Math.max(0, Math.round((bal / inc) * 100)) : 0;
+                
+                // Số dư tổng cộng tính trên toàn thời gian
+                const allBalances = calculateBalances();
+                const totalBalanceAllTime = Object.values(allBalances).reduce((a, b) => a + b, 0);
+
+                const rate = inc > 0 ? Math.max(0, Math.round(((inc - exp) / inc) * 100)) : 0;
 
                 const kpiInc = document.getElementById('kpiIncome');
                 const kpiExp = document.getElementById('kpiExpense');
@@ -531,28 +629,31 @@
                 const kpiRate = document.getElementById('kpiSavingRate');
                 if (kpiInc) kpiInc.textContent = formatVND(inc);
                 if (kpiExp) kpiExp.textContent = formatVND(exp);
-                if (kpiBal) kpiBal.textContent = formatVND(bal);
+                if (kpiBal) kpiBal.textContent = formatVND(totalBalanceAllTime);
                 if (kpiRate) kpiRate.textContent = rate + '%';
 
-                const accBalances = {};
-                ACCOUNT_LIST.forEach(acc => accBalances[acc] = 0);
-                transactions.forEach(t => {
-                    const acc = t.member || 'Tiền mặt';
-                    if (accBalances[acc] !== undefined) {
-                        if (t.type === 'income') accBalances[acc] += Number(t.amount);
-                        else accBalances[acc] -= Number(t.amount);
+                // Lọc hiển thị ngân hàng
+                let visibleAccs = ACCOUNT_LIST.filter(acc => (allBalances[acc] || 0) !== 0);
+                if (!showAllAccounts) {
+                    if (visibleAccs.length === 0) {
+                        // Nếu tất cả 0đ thì lấy 4 cái đầu tiên
+                        visibleAccs = ACCOUNT_LIST.slice(0, 4);
+                    } else if (visibleAccs.length > 4) {
+                        visibleAccs = visibleAccs.slice(0, 4);
                     }
-                });
+                } else {
+                    visibleAccs = ACCOUNT_LIST;
+                }
 
                 const grid = document.getElementById('accountBalancesGrid');
                 if (grid) {
-                    grid.innerHTML = ACCOUNT_LIST.map(acc => {
+                    grid.innerHTML = visibleAccs.map(acc => {
                         const icon = ACCOUNT_ICONS[acc] || '💳';
-                        const balance = accBalances[acc] || 0;
+                        const balance = allBalances[acc] || 0;
                         return `
-                            <div style="padding: 12px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; text-align: center;">
+                            <div style="padding: 12px; border-radius: 12px; background: ${balance !== 0 ? '#ffffff' : '#f8fafc'}; border: 1px solid ${balance !== 0 ? '#cbd5e1' : '#e2e8f0'}; text-align: center; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
                                 <p style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin: 0 0 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${icon} ${acc}</p>
-                                <p style="font-size: 13px; font-weight: 900; color: ${balance >= 0 ? '#1e293b' : '#e11d48'}; margin: 0;">${formatVND(balance)}</p>
+                                <p style="font-size: 14px; font-weight: 900; color: ${balance > 0 ? '#059669' : (balance < 0 ? '#e11d48' : '#94a3b8')}; margin: 0;">${formatVND(balance)}</p>
                             </div>
                         `;
                     }).join('');
@@ -567,7 +668,7 @@
                             const accName = t.member || 'Tiền mặt';
                             const icon = ACCOUNT_ICONS[accName] || '💳';
                             return `
-                                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;">
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
                                     <td style="padding: 12px; color: #475569; font-weight: 500;">${t.date || '-'}</td>
                                     <td style="padding: 12px; font-weight: bold; color: #1e293b;">${t.category}</td>
                                     <td style="padding: 12px; color: #475569;">${t.note || ''}</td>
@@ -584,66 +685,87 @@
                     }
                 }
 
-                updateCharts(filtered);
+                processApproval();
             } catch (err) {
                 console.error("Render app error:", err);
             }
         }
 
-        function updateCharts(data) {
+        // Xử lý logic giải ngân và tạo văn bản tờ trình
+        function processApproval() {
             try {
-                if (typeof Chart === 'undefined') return;
-                const expMap = {};
-                data.filter(t => t.type === 'expense').forEach(t => {
-                    expMap[t.category] = (expMap[t.category] || 0) + Number(t.amount);
-                });
-                const expLabels = Object.keys(expMap);
-                const expValues = Object.values(expMap);
+                const amount = Number(document.getElementById('apprAmount').value) || 0;
+                const reason = document.getElementById('apprReason').value.trim() || 'Thanh toán chi phí gia đình';
+                const selectEl = document.getElementById('apprSourceAcc');
+                const docEl = document.getElementById('approvalDocText');
 
-                const expCanvas = document.getElementById('expenseChart');
-                if (expCanvas) {
-                    if (expenseChartInstance) expenseChartInstance.destroy();
-                    expenseChartInstance = new Chart(expCanvas.getContext('2d'), {
-                        type: 'doughnut',
-                        data: {
-                            labels: expLabels.length ? expLabels : ['Chưa có chi tiêu'],
-                            datasets: [{
-                                data: expValues.length ? expValues : [1],
-                                backgroundColor: expValues.length ? ['#f43f5e', '#fb923c', '#eab308', '#10b981', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#84cc16'] : ['#e2e8f0']
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-                    });
+                const allBalances = calculateBalances();
+                
+                // Lọc các ngân hàng có số dư >= số tiền yêu cầu
+                const validAccs = ACCOUNT_LIST.filter(acc => (allBalances[acc] || 0) >= amount && amount > 0);
+
+                let currentSel = selectEl.value;
+                selectEl.innerHTML = '';
+
+                if (amount <= 0) {
+                    selectEl.innerHTML = '<option value="">Nhập số tiền để lọc ngân hàng...</option>';
+                    if (docEl) docEl.textContent = 'Vui lòng nhập số tiền chi đề xuất và lý do để hệ thống tự động kiểm tra số dư ngân hàng và lập tờ trình...';
+                    return;
                 }
 
-                const activeAccs = ACCOUNT_LIST.filter(acc => {
-                    return data.some(t => (t.member || 'Tiền mặt') === acc);
-                });
-                const chartLabels = activeAccs.length ? activeAccs : ACCOUNT_LIST;
-                const incByAcc = chartLabels.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
-                const expByAcc = chartLabels.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
-
-                const accCanvas = document.getElementById('accountChart');
-                if (accCanvas) {
-                    if (accountChartInstance) accountChartInstance.destroy();
-                    accountChartInstance = new Chart(accCanvas.getContext('2d'), {
-                        type: 'bar',
-                        data: {
-                            labels: chartLabels,
-                            datasets: [
-                                { label: 'Thu nhập', data: incByAcc, backgroundColor: '#059669', borderRadius: 6 },
-                                { label: 'Chi tiêu', data: expByAcc, backgroundColor: '#e11d48', borderRadius: 6 }
-                            ]
-                        },
-                        options: { 
-                            responsive: true, 
-                            maintainAspectRatio: false, 
-                            plugins: { legend: { position: 'bottom' } },
-                            scales: { x: { ticks: { font: { size: 10 } } } }
-                        }
-                    });
+                if (validAccs.length === 0) {
+                    selectEl.innerHTML = '<option value="">❌ Không có tài khoản nào đủ số dư!</option>';
+                    if (docEl) docEl.textContent = `⚠️ KHÔNG THỂ GIẢI NGÂN!\nKhông có ngân hàng nào có đủ số dư ${formatVND(amount)} để thực hiện khoản chi này.`;
+                    return;
                 }
-            } catch (e) { console.error("Chart error:", e); }
+
+                validAccs.forEach(acc => {
+                    const icon = ACCOUNT_ICONS[acc] || '💳';
+                    selectEl.innerHTML += `<option value="${acc}">${icon} ${acc} (Dư: ${formatVND(allBalances[acc])})</option>`;
+                });
+
+                if (validAccs.includes(currentSel)) {
+                    selectEl.value = currentSel;
+                } else {
+                    selectEl.value = validAccs[0];
+                }
+
+                const chosenAcc = selectEl.value;
+                const chosenBal = allBalances[chosenAcc] || 0;
+                const remainBal = chosenBal - amount;
+                const todayFormatted = new Date().toLocaleDateString('vi-VN');
+
+                const docContent = 
+`TỜ TRÌNH XIN XÉT DUYỆT GIẢI NGÂN
+---------------------------------
+• Ngày lập: ${todayFormatted}
+• Quỹ / Đơn vị: ${currentUser ? currentUser.familyName : 'Quỹ Gia Đình'}
+• Lý do giải ngân: ${reason}
+• Số tiền đề xuất chi: ${formatVND(amount)}
+
+PHƯƠNG ÁN TRÍCH TIỀN:
+• Ngân hàng chỉ định: ${chosenAcc}
+• Số dư khả dụng hiện tại: ${formatVND(chosenBal)}
+• Số dư dự kiến sau trích: ${formatVND(remainBal)}
+
+ĐÁNH GIÁ: Tài khoản ${chosenAcc} ĐỦ ĐIỀU KIỆN GIẢI NGÂN.
+Trân trọng trình phê duyệt!`;
+
+                if (docEl) docEl.textContent = docContent;
+
+            } catch (e) { console.error("Process approval error:", e); }
+        }
+
+        function copyApprovalDoc() {
+            const text = document.getElementById('approvalDocText').textContent;
+            if (!text || text.startsWith('Vui lòng') || text.startsWith('⚠️')) {
+                return alert('Chưa có nội dung tờ trình hợp lệ để copy!');
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✓ Đã copy Tờ trình xét duyệt giải ngân vào bộ nhớ tạm!');
+            }).catch(() => {
+                alert('Không thể copy tự động, vui lòng chọn văn bản và copy thủ công.');
+            });
         }
 
         function exportCSV() {
