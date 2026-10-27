@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="vi" class="scroll-smooth">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinFamily Cloud - Quản Lý Dòng Tiền Gia Đình</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Thư viện Firebase Compat ổn định cao -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
@@ -25,7 +29,7 @@
                 <p class="text-xs text-slate-500 mt-1">Dự án: quanlidongtien-53a25</p>
                 <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-medium text-slate-600">
                     <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                    <span id="connText">Đang khởi tạo kết nối Cloud...</span>
+                    <span id="connText">Đang kiểm tra kết nối...</span>
                 </div>
             </div>
 
@@ -71,7 +75,7 @@
                         <div class="flex items-center gap-2">
                             <h1 id="headerFamilyName" class="font-bold text-slate-800 text-base">Quỹ Gia Đình</h1>
                             <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 uppercase flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đồng bộ Cloud
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đã đồng bộ Cloud
                             </span>
                         </div>
                         <p id="headerUserEmail" class="text-xs text-slate-500 font-medium">user@email.com</p>
@@ -214,13 +218,308 @@
         </main>
     </div>
 
-    <!-- FIREBASE CLOUD SCRIPT -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
-            signOut, onAuthStateChanged, updateProfile 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, setDoc, getDoc 
-        } from "
+    <script>
+        // 1. CẤU HÌNH DỰ ÁN: quanlidongtien-53a25
+        const YOUR_FIREBASE_CONFIG = {
+            apiKey: ["AIzaSy", "CV4AetmA-0Cnu5ScPvdvdosz54Mogg9vQ"].join(""),
+            authDomain: "quanlidongtien-53a25.firebaseapp.com",
+            projectId: "quanlidongtien-53a25",
+            storageBucket: "quanlidongtien-53a25.firebasestorage.app",
+            messagingSenderId: "277992506032",
+            appId: "1:277992506032:web:d3992573d3d547d48b7175",
+            measurementId: "G-Y649WVZHPS"
+        };
+
+        let auth = null, db = null, currentUser = null, unsubscribeFirestore = null;
+        let currentAuthMode = 'login', currentTxType = 'expense';
+        let transactions = [];
+        let expenseChartInstance = null, memberChartInstance = null;
+
+        const CATEGORIES = {
+            expense: ['Ăn uống & Đi chợ', 'Hóa đơn Điện/Nước/Net', 'Học phí & Con cái', 'Đi lại & Xăng xe', 'Y tế & Sức khỏe', 'Mua sắm gia đình', 'Chi phí khác'],
+            income: ['Lương chính', 'Thưởng & Phụ cấp', 'Kinh doanh / Làm thêm', 'Lãi tiết kiệm / Đầu tư', 'Thu nhập khác']
+        };
+
+        // Khởi tạo ngày mặc định
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('txDate').value = todayStr;
+        document.getElementById('monthFilter').value = todayStr.slice(0, 7);
+        document.getElementById('monthFilter').addEventListener('change', renderApp);
+
+        // Chuyển tab Đăng nhập / Đăng ký (Hoạt động độc lập ngay lập tức)
+        function switchAuthTab(mode) {
+            currentAuthMode = mode;
+            const isReg = mode === 'register';
+            document.getElementById('familyNameGroup').classList.toggle('hidden', !isReg);
+            document.getElementById('authSubmitBtn').innerHTML = isReg ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
+            document.getElementById('tabLoginBtn').className = !isReg ? 'py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition' : 'py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition';
+            document.getElementById('tabRegisterBtn').className = isReg ? 'py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition' : 'py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition';
+            hideAlert();
+        }
+
+        function showAlert(msg, isError = true) {
+            const box = document.getElementById('authAlert');
+            box.textContent = msg;
+            box.className = 'mb-4 p-3 rounded-xl text-xs font-bold border text-center ' + (isError ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200');
+            box.classList.remove('hidden');
+        }
+        function hideAlert() { document.getElementById('authAlert').classList.add('hidden'); }
+
+        function setTxType(type) {
+            currentTxType = type;
+            document.getElementById('btnTypeExpense').className = type === 'expense' ? 'py-2 rounded-lg text-xs font-bold bg-rose-600 text-white shadow' : 'py-2 rounded-lg text-xs font-bold text-slate-600';
+            document.getElementById('btnTypeIncome').className = type === 'income' ? 'py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow' : 'py-2 rounded-lg text-xs font-bold text-slate-600';
+            document.getElementById('txCategory').innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+        setTxType('expense');
+
+        function quickAmount(val) {
+            const input = document.getElementById('txAmount');
+            input.value = (Number(input.value) || 0) + val;
+        }
+
+        // 2. KHỞI TẠO FIREBASE
+        try {
+            if (typeof firebase === 'undefined') {
+                throw new Error("Mạng đang chặn tải thư viện gstatic.com. Hãy nhấn Ctrl+F5 hoặc đổi mạng!");
+            }
+            if (!firebase.apps.length) {
+                firebase.initializeApp(YOUR_FIREBASE_CONFIG);
+            }
+            auth = firebase.auth();
+            db = firebase.firestore();
+
+            document.getElementById('connDot').className = 'w-2 h-2 rounded-full bg-emerald-500';
+            document.getElementById('connText').innerHTML = '<span class="text-emerald-600 font-bold">✓ Đã kết nối Cloud (quanlidongtien-53a25)</span>';
+
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    let familyName = user.displayName || 'Quỹ Gia Đình';
+                    try {
+                        const snap = await db.collection('family_profiles').doc(user.uid).get();
+                        if (snap.exists && snap.data().familyName) familyName = snap.data().familyName;
+                    } catch (e) {}
+                    enterDashboard(user.uid, user.email, familyName);
+                } else {
+                    document.getElementById('appScreen').classList.add('hidden');
+                    document.getElementById('authScreen').classList.remove('hidden');
+                }
+            });
+        } catch (err) {
+            document.getElementById('connDot').className = 'w-2 h-2 rounded-full bg-rose-500';
+            document.getElementById('connText').innerHTML = `<span class="text-rose-600 font-bold">${err.message}</span>`;
+        }
+
+        // 3. ĐĂNG KÝ / ĐĂNG NHẬP LÊN CLOUD
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+            if (!auth) return showAlert("❌ Chưa tải được thư viện Firebase. Hãy tải lại trang (Ctrl + F5)!");
+
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const btn = document.getElementById('authSubmitBtn');
+            
+            btn.disabled = true;
+            btn.innerHTML = `<div class="w-4 h-4 border-2 border-white rounded-full loader border-r-transparent"></div> Đang đồng bộ...`;
+
+            try {
+                if (currentAuthMode === 'register') {
+                    const famName = document.getElementById('authFamilyName').value.trim() || 'Quỹ Gia Đình';
+                    const cred = await auth.createUserWithEmailAndPassword(email, password);
+                    try { await cred.user.updateProfile({ displayName: famName }); } catch(e){}
+                    try { 
+                        await db.collection('family_profiles').doc(cred.user.uid).set({ 
+                            familyName: famName, email, createdAt: new Date().toISOString() 
+                        }); 
+                    } catch(e){}
+                    showAlert('✓ Tạo tài khoản Cloud thành công!', false);
+                } else {
+                    await auth.signInWithEmailAndPassword(email, password);
+                }
+            } catch (err) {
+                console.error(err);
+                if (err.code === 'auth/email-already-in-use') {
+                    showAlert('❌ Email này đã tồn tại! Hãy bấm sang tab Đăng nhập.');
+                } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+                    showAlert('❌ Email hoặc mật khẩu không đúng!');
+                } else if (err.code === 'auth/operation-not-allowed' || err.code === 'auth/configuration-not-found') {
+                    showAlert('❌ Bạn chưa bật Email/Password trong mục Authentication của dự án quanlidongtien-53a25!');
+                } else if (err.code === 'auth/unauthorized-domain') {
+                    showAlert('❌ Bạn chưa thêm tên miền hieuhau2701-commits.github.io vào mục Authorized domains!');
+                } else {
+                    showAlert(`❌ Lỗi Firebase (${err.code || 'Error'}): ${err.message}`);
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = currentAuthMode === 'register' ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
+            }
+        });
+
+        // 4. VÀO DASHBOARD & ĐỒNG BỘ DỮ LIỆU
+        function enterDashboard(uid, email, familyName) {
+            currentUser = { uid, email, familyName };
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            document.getElementById('headerFamilyName').textContent = familyName;
+            document.getElementById('headerUserEmail').textContent = email;
+
+            if (unsubscribeFirestore) unsubscribeFirestore();
+            unsubscribeFirestore = db.collection('families').doc(uid).collection('transactions')
+                .onSnapshot((snapshot) => {
+                    transactions = [];
+                    snapshot.forEach(d => transactions.push({ id: d.id, ...d.data() }));
+                    renderApp();
+                }, (error) => {
+                    console.error("Firestore error:", error);
+                    document.getElementById('txTableBody').innerHTML = `<tr><td colspan="6" class="py-6 text-center text-rose-600 font-bold">❌ Bạn chưa tạo Firestore Database hoặc chưa mở Rules (allow read, write: if request.auth != null;) trong dự án mới!</td></tr>`;
+                });
+        }
+
+        async function handleLogout() {
+            if (unsubscribeFirestore) unsubscribeFirestore();
+            if (auth) await auth.signOut();
+        }
+
+        document.getElementById('txForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !db) return;
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = "Đang lưu lên Cloud...";
+
+            const newTx = {
+                type: currentTxType,
+                amount: Number(document.getElementById('txAmount').value),
+                category: document.getElementById('txCategory').value,
+                member: document.getElementById('txMember').value,
+                date: document.getElementById('txDate').value,
+                note: document.getElementById('txNote').value.trim(),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await db.collection('families').doc(currentUser.uid).collection('transactions').add(newTx);
+                document.getElementById('txAmount').value = '';
+                document.getElementById('txNote').value = '';
+            } catch (err) {
+                alert("❌ Lỗi lưu dữ liệu: Bạn hãy vào mục Firestore Database -> Rules trên Firebase để mở quyền đọc/ghi!");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "☁️ Lưu lên Cloud";
+            }
+        });
+
+        async function deleteTx(id) {
+            if (!currentUser || !db) return;
+            try {
+                await db.collection('families').doc(currentUser.uid).collection('transactions').doc(id).delete();
+            } catch (err) {
+                alert("Không thể xóa giao dịch: " + err.message);
+            }
+        }
+
+        function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫'; }
+
+        function renderApp() {
+            const selectedMonth = document.getElementById('monthFilter').value;
+            const searchKey = (document.getElementById('searchInput').value || '').toLowerCase();
+            const memberFilter = document.getElementById('filterMember').value;
+
+            const filtered = transactions.filter(t => {
+                const matchMonth = !selectedMonth || (t.date && t.date.startsWith(selectedMonth));
+                const matchMember = memberFilter === 'ALL' || t.member === memberFilter;
+                const matchSearch = !searchKey || 
+                    (t.note && t.note.toLowerCase().includes(searchKey)) || 
+                    (t.category && t.category.toLowerCase().includes(searchKey));
+                return matchMonth && matchMember && matchSearch;
+            }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+            let inc = 0, exp = 0;
+            filtered.forEach(t => t.type === 'income' ? inc += Number(t.amount) : exp += Number(t.amount));
+            const bal = inc - exp;
+            const rate = inc > 0 ? Math.max(0, Math.round((bal / inc) * 100)) : 0;
+
+            document.getElementById('kpiIncome').textContent = formatVND(inc);
+            document.getElementById('kpiExpense').textContent = formatVND(exp);
+            document.getElementById('kpiBalance').textContent = formatVND(bal);
+            document.getElementById('kpiSavingRate').textContent = rate + '%';
+
+            const tbody = document.getElementById('txTableBody');
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 font-medium">Chưa có giao dịch nào trong kỳ này.</td></tr>`;
+            } else {
+                tbody.innerHTML = filtered.map(t => `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50">
+                        <td class="py-3 px-3 text-slate-600 font-medium">${t.date || '-'}</td>
+                        <td class="py-3 px-3 font-bold text-slate-800">${t.category}</td>
+                        <td class="py-3 px-3 text-slate-600">${t.note}</td>
+                        <td class="py-3 px-3"><span class="px-2 py-1 rounded-md bg-slate-100 text-slate-700 font-bold text-[10px] uppercase">${t.member}</span></td>
+                        <td class="py-3 px-3 text-right font-black text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
+                        </td>
+                        <td class="py-3 px-3 text-center">
+                            <button onclick="deleteTx('${t.id}')" class="text-rose-500 hover:text-rose-700 font-bold px-2">✕</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            updateCharts(filtered);
+        }
+
+        function updateCharts(data) {
+            if (typeof Chart === 'undefined') return;
+            const expMap = {};
+            data.filter(t => t.type === 'expense').forEach(t => {
+                expMap[t.category] = (expMap[t.category] || 0) + Number(t.amount);
+            });
+            const expLabels = Object.keys(expMap);
+            const expValues = Object.values(expMap);
+
+            if (expenseChartInstance) expenseChartInstance.destroy();
+            expenseChartInstance = new Chart(document.getElementById('expenseChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: expLabels.length ? expLabels : ['Chưa có chi tiêu'],
+                    datasets: [{
+                        data: expValues.length ? expValues : [1],
+                        backgroundColor: expValues.length ? ['#f43f5e', '#fb923c', '#eab308', '#10b981', '#06b6d4', '#6366f1', '#a855f7'] : ['#e2e8f0']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            const members = ['Quỹ Chung', 'Bố', 'Mẹ', 'Con cái', 'Ông Bà'];
+            const incByMem = members.map(m => data.filter(t => t.member === m && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
+            const expByMem = members.map(m => data.filter(t => t.member === m && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
+
+            if (memberChartInstance) memberChartInstance.destroy();
+            memberChartInstance = new Chart(document.getElementById('memberChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: members,
+                    datasets: [
+                        { label: 'Thu nhập', data: incByMem, backgroundColor: '#10b981', borderRadius: 6 },
+                        { label: 'Chi tiêu', data: expByMem, backgroundColor: '#f43f5e', borderRadius: 6 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function exportCSV() {
+            if (!transactions.length) return alert('Chưa có giao dịch nào để xuất!');
+            let csv = '\uFEFFNgày,Loại,Danh mục,Thành viên,Số tiền,Ghi chú\n';
+            transactions.forEach(t => {
+                csv += `${t.date || ''},${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'},"${t.category}","${t.member}",${t.amount},"${t.note || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Bao_cao_dong_tien_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
