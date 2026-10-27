@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Dòng Tiền & Tài Khoản</title>
+    <title>FinFamily Cloud - Quản Lý Dòng Tiền & Tài Khoản</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -17,11 +17,13 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
+
+    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
     <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-800 to-slate-900">
         <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-8">
             <div class="text-center mb-6">
                 <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500 flex items-center justify-center font-bold text-2xl text-white shadow-lg mb-4">₫</div>
-                <h1 class="text-2xl font-bold text-slate-800">QUANLIDONGTIEN</h1>
+                <h1 class="text-2xl font-bold text-slate-800">FinFamily Cloud</h1>
                 <p class="text-xs text-slate-500 mt-1">Quản lý Dòng tiền & Tài khoản Ngân hàng</p>
                 <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-medium text-slate-600">
                     <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
@@ -220,16 +222,17 @@
     </div>
 
     <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCV4AetmA-0Cnu5ScPvdvdosz54Mogg9vQ",
-  authDomain: "quanlidongtien-53a25.firebaseapp.com",
-  databaseURL: "https://quanlidongtien-53a25-default-rtdb.firebaseio.com",
-  projectId: "quanlidongtien-53a25",
-  storageBucket: "quanlidongtien-53a25.firebasestorage.app",
-  messagingSenderId: "277992506032",
-  appId: "1:277992506032:web:d3992573d3d547d48b7175",
-  measurementId: "G-Y649WVZHPS"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyCV4AetmA-0Cnu5ScPvdvdosz54Mogg9vQ",
+            authDomain: "quanlidongtien-53a25.firebaseapp.com",
+            databaseURL: "https://quanlidongtien-53a25-default-rtdb.firebaseio.com",
+            projectId: "quanlidongtien-53a25",
+            storageBucket: "quanlidongtien-53a25.firebasestorage.app",
+            messagingSenderId: "277992506032",
+            appId: "1:277992506032:web:d3992573d3d547d48b7175",
+            measurementId: "G-Y649WVZHPS"
+        };
+
         let auth = null, db = null, currentUser = null, unsubscribeFirestore = null;
         let currentAuthMode = 'login', currentTxType = 'expense';
         let transactions = [];
@@ -279,7 +282,7 @@ const firebaseConfig = {
 
         try {
             if (typeof firebase === 'undefined') throw new Error("Lỗi kết nối thư viện Firebase.");
-            if (!firebase.apps.length) firebase.initializeApp(YOUR_FIREBASE_CONFIG);
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             db = firebase.firestore();
 
@@ -374,7 +377,7 @@ const firebaseConfig = {
                 type: currentTxType,
                 amount: Number(document.getElementById('txAmount').value),
                 category: document.getElementById('txCategory').value,
-                member: document.getElementById('txAccount').value, // Lưu nguồn tài khoản vào trường member tương thích cơ sở dữ liệu cũ
+                member: document.getElementById('txAccount').value,
                 date: document.getElementById('txDate').value,
                 note: document.getElementById('txNote').value.trim(),
                 createdAt: new Date().toISOString()
@@ -427,7 +430,6 @@ const firebaseConfig = {
             document.getElementById('kpiBalance').textContent = formatVND(bal);
             document.getElementById('kpiSavingRate').textContent = rate + '%';
 
-            // Tính số dư thực tế theo từng tài khoản từ toàn bộ dữ liệu (không phụ thuộc bộ lọc tháng để ra số dư thực tế tích lũy)
             const accBalances = {};
             ACCOUNT_LIST.forEach(acc => accBalances[acc] = 0);
             transactions.forEach(t => {
