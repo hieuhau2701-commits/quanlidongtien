@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinFamily Cloud - Quản Lý Dòng Tiền & Tài Khoản</title>
+    <title>FinFamily Cloud - Quản Lý Dòng Tiền & Tài Khoản Ngân Hàng</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -11,47 +11,48 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-        .loader { border-top-color: #10b981; animation: spinner 1s linear infinite; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 0; box-sizing: border-box; }
+        .loader { border-top-color: #10b981; animation: spinner 1s linear infinite; border-width: 2px; border-style: solid; border-radius: 50%; width: 1rem; height: 1rem; }
         @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
     <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
-    <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-800 to-slate-900">
-        <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-8">
-            <div class="text-center mb-6">
-                <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500 flex items-center justify-center font-bold text-2xl text-white shadow-lg mb-4">₫</div>
-                <h1 class="text-2xl font-bold text-slate-800">FinFamily Cloud</h1>
-                <p class="text-xs text-slate-500 mt-1">Quản lý Dòng tiền & Tài khoản Ngân hàng</p>
-                <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-medium text-slate-600">
-                    <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+    <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-800 to-slate-900" style="background: #1e293b; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-8" style="max-width: 400px; width: 100%; background: #ffffff; border-radius: 24px; padding: 32px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);">
+            <div class="text-center mb-6" style="text-align: center; margin-bottom: 24px;">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500 flex items-center justify-center font-bold text-2xl text-white shadow-lg mb-4" style="width: 56px; height: 56px; margin: 0 auto 16px auto; background: #10b981; color: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">₫</div>
+                <h1 class="text-2xl font-bold text-slate-800" style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0;">FinFamily Cloud</h1>
+                <p class="text-xs text-slate-500 mt-1" style="font-size: 12px; color: #64748b; margin-top: 4px;">Quản lý Dòng tiền & Tài khoản Ngân hàng</p>
+                <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-medium text-slate-600" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 9999px; background: #f1f5f9; font-size: 11px;">
+                    <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; display: inline-block;"></span>
                     <span id="connText">Đang kiểm tra kết nối...</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6">
-                <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition">Đăng nhập</button>
-                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition">Đăng ký mới</button>
+            <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 24px;">
+                <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: #ffffff; border: none; cursor: pointer;">Đăng nhập</button>
+                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: transparent; color: #64748b; border: none; cursor: pointer;">Đăng ký mới</button>
             </div>
 
-            <div id="authAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-bold border text-center"></div>
+            <div id="authAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-bold border text-center" style="display: none; margin-bottom: 16px; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: bold; text-align: center;"></div>
 
-            <form id="authForm" class="space-y-4">
-                <div id="familyNameGroup" class="hidden">
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Tên Quỹ / Gia đình</label>
-                    <input type="text" id="authFamilyName" placeholder="VD: Gia đình Phạm Hiếu" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
+            <form id="authForm" class="space-y-4" style="display: flex; flex-direction: column; gap: 16px;">
+                <div id="familyNameGroup" class="hidden" style="display: none;">
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1" style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Tên Quỹ / Gia đình</label>
+                    <input type="text" id="authFamilyName" placeholder="VD: Gia đình Phạm Hiếu" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; box-sizing: border-box;">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Địa chỉ Email</label>
-                    <input type="email" id="authEmail" required placeholder="email-cua-ban@gmail.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1" style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Địa chỉ Email</label>
+                    <input type="email" id="authEmail" required placeholder="email-cua-ban@gmail.com" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; box-sizing: border-box;">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Mật khẩu</label>
-                    <input type="password" id="authPassword" required minlength="6" placeholder="Tối thiểu 6 ký tự" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1" style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Mật khẩu</label>
+                    <input type="password" id="authPassword" required minlength="6" placeholder="Tối thiểu 6 ký tự" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; box-sizing: border-box;">
                 </div>
-                <button type="submit" id="authSubmitBtn" class="w-full py-3.5 mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
+                <button type="submit" id="authSubmitBtn" style="width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; background: #059669; color: white; font-weight: bold; font-size: 14px; border: none; cursor: pointer; box-shadow: 0 10px 15px -3px rgb(5 150 105 / 0.3);">
                     <span>Đăng nhập đồng bộ Cloud</span>
                 </button>
             </form>
@@ -59,126 +60,115 @@
     </div>
 
     <!-- MÀN HÌNH CHÍNH (DASHBOARD) -->
-    <div id="appScreen" class="hidden flex-1 flex flex-col">
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">₫</div>
+    <div id="appScreen" class="hidden flex-1 flex flex-col" style="display: none; flex: 1; flex-direction: column;">
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm" style="background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 30; padding: 12px 16px;">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3" style="max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+                <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 12px;">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg" style="width: 40px; height: 40px; border-radius: 12px; background: #059669; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">₫</div>
                     <div>
-                        <div class="flex items-center gap-2">
-                            <h1 id="headerFamilyName" class="font-bold text-slate-800 text-base">Quỹ Gia Đình</h1>
-                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 uppercase flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đã đồng bộ Cloud
-                            </span>
+                        <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
+                            <h1 id="headerFamilyName" class="font-bold text-slate-800 text-base" style="font-weight: bold; font-size: 16px; margin: 0;">Quỹ Gia Đình</h1>
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 uppercase" style="padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 9999px; background: #d1fae5; color: #047857;">Đã đồng bộ Cloud</span>
                         </div>
-                        <p id="headerUserEmail" class="text-xs text-slate-500 font-medium">user@email.com</p>
+                        <p id="headerUserEmail" class="text-xs text-slate-500 font-medium" style="font-size: 12px; color: #64748b; margin: 0;">user@email.com</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <input type="month" id="monthFilter" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium bg-slate-50">
-                    <button onclick="exportCSV()" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-xs font-medium transition">📥 Xuất Excel</button>
-                    <button onclick="handleLogout()" class="px-4 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition">Đăng xuất</button>
+                <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="month" id="monthFilter" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; background: #f8fafc;">
+                    <button onclick="exportCSV()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; font-size: 12px; cursor: pointer; font-weight: 500;">📥 Xuất Excel</button>
+                    <button onclick="handleLogout()" style="padding: 6px 14px; border-radius: 8px; background: #fff1f2; color: #e11d48; font-size: 12px; font-weight: bold; border: none; cursor: pointer;">Đăng xuất</button>
                 </div>
             </div>
         </header>
 
-        <main class="max-w-7xl w-full mx-auto px-4 py-6 space-y-6 flex-1">
+        <main class="max-w-7xl w-full mx-auto px-4 py-6 space-y-6 flex-1" style="max-width: 1280px; width: 100%; margin: 0 auto; padding: 24px 16px; flex: 1; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box;">
             <!-- 4 Thẻ chỉ số tổng quan -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-bold uppercase text-slate-400">Tổng Thu Nhập</p>
-                    <p id="kpiIncome" class="text-2xl font-black text-emerald-600 mt-1">0 ₫</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+                    <p style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #94a3b8; margin: 0 0 4px 0;">Tổng Thu Nhập</p>
+                    <p id="kpiIncome" style="font-size: 22px; font-weight: 900; color: #059669; margin: 0;">0 ₫</p>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-bold uppercase text-slate-400">Tổng Chi Tiêu</p>
-                    <p id="kpiExpense" class="text-2xl font-black text-rose-600 mt-1">0 ₫</p>
+                <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+                    <p style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #94a3b8; margin: 0 0 4px 0;">Tổng Chi Tiêu</p>
+                    <p id="kpiExpense" style="font-size: 22px; font-weight: 900; color: #e11d48; margin: 0;">0 ₫</p>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-bold uppercase text-slate-400">Số Dư Tổng Cộng</p>
-                    <p id="kpiBalance" class="text-2xl font-black text-blue-600 mt-1">0 ₫</p>
+                <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+                    <p style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #94a3b8; margin: 0 0 4px 0;">Số Dư Tổng Cộng</p>
+                    <p id="kpiBalance" style="font-size: 22px; font-weight: 900; color: #2563eb; margin: 0;">0 ₫</p>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-bold uppercase text-slate-400">Tỷ Lệ Tiết Kiệm</p>
-                    <p id="kpiSavingRate" class="text-2xl font-black text-teal-600 mt-1">0%</p>
+                <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+                    <p style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #94a3b8; margin: 0 0 4px 0;">Tỷ Lệ Tiết Kiệm</p>
+                    <p id="kpiSavingRate" style="font-size: 22px; font-weight: 900; color: #0d9488; margin: 0;">0%</p>
                 </div>
             </div>
 
             <!-- SỐ DƯ CHI TIẾT THEO TỪNG TÀI KHOẢN / NGÂN HÀNG -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-800 text-sm mb-3">💳 Số dư thực tế theo từng tài khoản / ngân hàng</h3>
-                <div id="accountBalancesGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                    <!-- Dữ liệu tự động đổ vào -->
-                </div>
+            <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+                <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0 0 12px 0;">💳 Số dư thực tế theo từng tài khoản / ngân hàng / ví</h3>
+                <div id="accountBalancesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;"></div>
             </div>
 
             <!-- Form & Biểu đồ -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
                 <!-- Thêm giao dịch -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="font-bold text-slate-800 text-base mb-4">➕ Ghi nhận giao dịch</h3>
-                    <form id="txForm" class="space-y-3.5">
-                        <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
-                            <button type="button" id="btnTypeExpense" onclick="setTxType('expense')" class="py-2 rounded-lg text-xs font-bold bg-rose-600 text-white shadow transition">Khoản Chi (-)</button>
-                            <button type="button" id="btnTypeIncome" onclick="setTxType('income')" class="py-2 rounded-lg text-xs font-bold text-slate-600 transition">Khoản Thu (+)</button>
+                <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+                    <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">➕ Ghi nhận giao dịch</h3>
+                    <form id="txForm" style="display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; background: #f1f5f9; padding: 4px; border-radius: 12px;">
+                            <button type="button" id="btnTypeExpense" onclick="setTxType('expense')" style="padding: 8px; border-radius: 8px; font-size: 12px; font-weight: bold; background: #e11d48; color: white; border: none; cursor: pointer;">Khoản Chi (-)</button>
+                            <button type="button" id="btnTypeIncome" onclick="setTxType('income')" style="padding: 8px; border-radius: 8px; font-size: 12px; font-weight: bold; background: transparent; color: #475569; border: none; cursor: pointer;">Khoản Thu (+)</button>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Số tiền (VNĐ)</label>
-                            <input type="number" id="txAmount" required min="1000" step="1000" placeholder="Ví dụ: 500000" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold focus:border-emerald-500 outline-none">
-                            <div class="flex flex-wrap gap-1.5 mt-2">
-                                <button type="button" onclick="quickAmount(50000)" class="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 rounded-md font-medium">+50k</button>
-                                <button type="button" onclick="quickAmount(100000)" class="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 rounded-md font-medium">+100k</button>
-                                <button type="button" onclick="quickAmount(500000)" class="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 rounded-md font-medium">+500k</button>
-                                <button type="button" onclick="quickAmount(1000000)" class="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 rounded-md font-medium">+1 Triệu</button>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Số tiền (VNĐ)</label>
+                            <input type="number" id="txAmount" required min="1000" step="1000" placeholder="Ví dụ: 500000" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; font-weight: bold; box-sizing: border-box;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                                <button type="button" onclick="quickAmount(50000)" style="padding: 4px 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">+50k</button>
+                                <button type="button" onclick="quickAmount(100000)" style="padding: 4px 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">+100k</button>
+                                <button type="button" onclick="quickAmount(500000)" style="padding: 4px 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">+500k</button>
+                                <button type="button" onclick="quickAmount(1000000)" style="padding: 4px 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">+1 Triệu</button>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Danh mục</label>
-                                <select id="txCategory" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white"></select>
+                                <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Danh mục</label>
+                                <select id="txCategory" style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;"></select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Tài khoản / Ngân hàng</label>
-                                <select id="txAccount" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white">
-                                    <option value="Tiền mặt">💵 Tiền mặt</option>
-                                    <option value="MB Bank">🏦 MB Bank</option>
-                                    <option value="TP Bank">🏦 TP Bank</option>
-                                    <option value="Viettel Money">📱 Viettel Money</option>
-                                    <option value="ShopeePay">🛍️ ShopeePay</option>
-                                    <option value="Timo">💳 Timo</option>
-                                </select>
+                                <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Nguồn tiền / Ngân hàng</label>
+                                <select id="txAccount" style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;"></select>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Ngày giao dịch</label>
-                            <input type="date" id="txDate" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium">
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Ngày giao dịch</label>
+                            <input type="date" id="txDate" required style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; box-sizing: border-box;">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Ghi chú</label>
-                            <input type="text" id="txNote" required placeholder="Ví dụ: Tiền chợ, nhận lương..." class="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:border-emerald-500 outline-none">
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Ghi chú</label>
+                            <input type="text" id="txNote" required placeholder="Ví dụ: Tiền chợ, nhận lương..." style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; box-sizing: border-box;">
                         </div>
 
-                        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition">
+                        <button type="submit" style="width: 100%; padding: 12px; border-radius: 12px; background: #059669; color: white; font-weight: bold; font-size: 13px; border: none; cursor: pointer;">
                             ☁️ Lưu lên Cloud
                         </button>
                     </form>
                 </div>
 
                 <!-- Biểu đồ -->
-                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                        <h3 class="font-bold text-slate-800 text-sm mb-3">🍩 Cơ cấu Chi tiêu</h3>
-                        <div class="flex-1 flex items-center justify-center min-h-[240px]">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                        <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0 0 12px 0;">🍩 Cơ cấu Chi tiêu</h3>
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px; position: relative;">
                             <canvas id="expenseChart"></canvas>
                         </div>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                        <h3 class="font-bold text-slate-800 text-sm mb-3">📊 Thu - Chi theo Tài khoản</h3>
-                        <div class="flex-1 flex items-center justify-center min-h-[240px]">
+                    <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                        <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0 0 12px 0;">📊 Thu - Chi theo Tài khoản</h3>
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px; position: relative;">
                             <canvas id="accountChart"></canvas>
                         </div>
                     </div>
@@ -186,35 +176,27 @@
             </div>
 
             <!-- Bảng lịch sử -->
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                    <h3 class="font-bold text-slate-800 text-base">📋 Lịch sử giao dịch đồng bộ</h3>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <input type="text" id="searchInput" oninput="renderApp()" placeholder="🔍 Tìm ghi chú, danh mục..." class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs">
-                        <select id="filterAccount" onchange="renderApp()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white">
-                            <option value="ALL">Tất cả tài khoản</option>
-                            <option value="Tiền mặt">💵 Tiền mặt</option>
-                            <option value="MB Bank">🏦 MB Bank</option>
-                            <option value="TP Bank">🏦 TP Bank</option>
-                            <option value="Viettel Money">📱 Viettel Money</option>
-                            <option value="ShopeePay">🛍️ ShopeePay</option>
-                            <option value="Timo">💳 Timo</option>
-                        </select>
+            <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0;">
+                <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
+                    <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0;">📋 Lịch sử giao dịch đồng bộ</h3>
+                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+                        <input type="text" id="searchInput" oninput="renderApp()" placeholder="🔍 Tìm ghi chú, danh mục..." style="padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px;">
+                        <select id="filterAccount" onchange="renderApp()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; background: white;"></select>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; text-align: left; border-collapse: collapse;">
                         <thead>
-                            <tr class="border-b border-slate-200 text-[11px] uppercase text-slate-400">
-                                <th class="py-2.5 px-3">Ngày</th>
-                                <th class="py-2.5 px-3">Danh mục</th>
-                                <th class="py-2.5 px-3">Ghi chú</th>
-                                <th class="py-2.5 px-3">Tài khoản / NH</th>
-                                <th class="py-2.5 px-3 text-right">Số tiền</th>
-                                <th class="py-2.5 px-3 text-center">Xóa</th>
+                            <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #94a3b8;">
+                                <th style="padding: 10px 12px;">Ngày</th>
+                                <th style="padding: 10px 12px;">Danh mục</th>
+                                <th style="padding: 10px 12px;">Ghi chú</th>
+                                <th style="padding: 10px 12px;">Tài khoản / Ngân hàng</th>
+                                <th style="padding: 10px 12px; text-align: right;">Số tiền</th>
+                                <th style="padding: 10px 12px; text-align: center;">Xóa</th>
                             </tr>
                         </thead>
-                        <tbody id="txTableBody" class="divide-y divide-slate-100 text-xs"></tbody>
+                        <tbody id="txTableBody" style="font-size: 12px;"></tbody>
                     </table>
                 </div>
             </div>
@@ -238,11 +220,52 @@
         let transactions = [];
         let expenseChartInstance = null, accountChartInstance = null;
 
-        const ACCOUNT_LIST = ['Tiền mặt', 'MB Bank', 'TP Bank', 'Viettel Money', 'ShopeePay', 'Timo'];
+        // Tổng hợp toàn bộ danh sách ngân hàng, ví điện tử và tiền mặt kèm icon
+        const ACCOUNT_ICONS = {
+            'Tiền mặt': '💵',
+            'MB Bank': '🏦',
+            'TP Bank': '🏦',
+            'Vietcombank': '🏦',
+            'Techcombank': '🏦',
+            'BIDV': '🏦',
+            'Agribank': '🏦',
+            'ACB': '🏦',
+            'VPBank': '🏦',
+            'Sacombank': '🏦',
+            'VIB': '🏦',
+            'SHB': '🏦',
+            'MSB': '🏦',
+            'Timo': '💳',
+            'MoMo': '📱',
+            'ZaloPay': '📱',
+            'Viettel Money': '📱',
+            'ShopeePay': '🛍️'
+        };
+        const ACCOUNT_LIST = Object.keys(ACCOUNT_ICONS);
+
         const CATEGORIES = {
             expense: ['Ăn uống & Đi chợ', 'Hóa đơn Điện/Nước/Net', 'Học phí & Con cái', 'Đi lại & Xăng xe', 'Y tế & Sức khỏe', 'Mua sắm gia đình', 'Chi phí khác'],
             income: ['Lương chính', 'Thưởng & Phụ cấp', 'Kinh doanh / Làm thêm', 'Lãi tiết kiệm / Đầu tư', 'Thu nhập khác']
         };
+
+        // Khởi tạo các ô chọn tài khoản tự động
+        function initAccountSelects() {
+            const txSelect = document.getElementById('txAccount');
+            const filterSelect = document.getElementById('filterAccount');
+            
+            let txOptions = '';
+            let filterOptions = '<option value="ALL">Tất cả tài khoản / Ngân hàng</option>';
+            
+            ACCOUNT_LIST.forEach(acc => {
+                const icon = ACCOUNT_ICONS[acc] || '💳';
+                txOptions += `<option value="${acc}">${icon} ${acc}</option>`;
+                filterOptions += `<option value="${acc}">${icon} ${acc}</option>`;
+            });
+            
+            txSelect.innerHTML = txOptions;
+            filterSelect.innerHTML = filterOptions;
+        }
+        initAccountSelects();
 
         const todayStr = new Date().toISOString().split('T')[0];
         document.getElementById('txDate').value = todayStr;
@@ -252,25 +275,31 @@
         function switchAuthTab(mode) {
             currentAuthMode = mode;
             const isReg = mode === 'register';
-            document.getElementById('familyNameGroup').classList.toggle('hidden', !isReg);
+            document.getElementById('familyNameGroup').style.display = isReg ? 'block' : 'none';
             document.getElementById('authSubmitBtn').innerHTML = isReg ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
-            document.getElementById('tabLoginBtn').className = !isReg ? 'py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition' : 'py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition';
-            document.getElementById('tabRegisterBtn').className = isReg ? 'py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition' : 'py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition';
+            document.getElementById('tabLoginBtn').style.background = !isReg ? '#ffffff' : 'transparent';
+            document.getElementById('tabLoginBtn').style.color = !isReg ? '#1e293b' : '#64748b';
+            document.getElementById('tabRegisterBtn').style.background = isReg ? '#ffffff' : 'transparent';
+            document.getElementById('tabRegisterBtn').style.color = isReg ? '#1e293b' : '#64748b';
             hideAlert();
         }
 
         function showAlert(msg, isError = true) {
             const box = document.getElementById('authAlert');
             box.textContent = msg;
-            box.className = 'mb-4 p-3 rounded-xl text-xs font-bold border text-center ' + (isError ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200');
-            box.classList.remove('hidden');
+            box.style.display = 'block';
+            box.style.background = isError ? '#fff1f2' : '#ecfdf5';
+            box.style.color = isError ? '#e11d48' : '#047857';
+            box.style.borderColor = isError ? '#fecdd3' : '#a7f3d0';
         }
-        function hideAlert() { document.getElementById('authAlert').classList.add('hidden'); }
+        function hideAlert() { document.getElementById('authAlert').style.display = 'none'; }
 
         function setTxType(type) {
             currentTxType = type;
-            document.getElementById('btnTypeExpense').className = type === 'expense' ? 'py-2 rounded-lg text-xs font-bold bg-rose-600 text-white shadow' : 'py-2 rounded-lg text-xs font-bold text-slate-600';
-            document.getElementById('btnTypeIncome').className = type === 'income' ? 'py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow' : 'py-2 rounded-lg text-xs font-bold text-slate-600';
+            document.getElementById('btnTypeExpense').style.background = type === 'expense' ? '#e11d48' : 'transparent';
+            document.getElementById('btnTypeExpense').style.color = type === 'expense' ? 'white' : '#475569';
+            document.getElementById('btnTypeIncome').style.background = type === 'income' ? '#059669' : 'transparent';
+            document.getElementById('btnTypeIncome').style.color = type === 'income' ? 'white' : '#475569';
             document.getElementById('txCategory').innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
         }
         setTxType('expense');
@@ -281,13 +310,13 @@
         }
 
         try {
-            if (typeof firebase === 'undefined') throw new Error("Lỗi kết nối thư viện Firebase.");
+            if (typeof firebase === 'undefined') throw new Error("Mạng đang chặn CDN Firebase.");
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             db = firebase.firestore();
 
-            document.getElementById('connDot').className = 'w-2 h-2 rounded-full bg-emerald-500';
-            document.getElementById('connText').innerHTML = '<span class="text-emerald-600 font-bold">✓ Đã kết nối Cloud</span>';
+            document.getElementById('connDot').style.background = '#10b981';
+            document.getElementById('connText').innerHTML = '<span style="color: #047857; font-weight: bold;">✓ Đã kết nối Cloud</span>';
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
@@ -298,13 +327,13 @@
                     } catch (e) {}
                     enterDashboard(user.uid, user.email, familyName);
                 } else {
-                    document.getElementById('appScreen').classList.add('hidden');
-                    document.getElementById('authScreen').classList.remove('hidden');
+                    document.getElementById('appScreen').style.display = 'none';
+                    document.getElementById('authScreen').style.display = 'flex';
                 }
             });
         } catch (err) {
-            document.getElementById('connDot').className = 'w-2 h-2 rounded-full bg-rose-500';
-            document.getElementById('connText').innerHTML = `<span class="text-rose-600 font-bold">${err.message}</span>`;
+            document.getElementById('connDot').style.background = '#e11d48';
+            document.getElementById('connText').innerHTML = `<span style="color: #e11d48; font-weight: bold;">${err.message}</span>`;
         }
 
         document.getElementById('authForm').addEventListener('submit', async (e) => {
@@ -317,7 +346,7 @@
             const btn = document.getElementById('authSubmitBtn');
             
             btn.disabled = true;
-            btn.innerHTML = `<div class="w-4 h-4 border-2 border-white rounded-full loader border-r-transparent"></div> Đang đồng bộ...`;
+            btn.innerHTML = `Đang đồng bộ...`;
 
             try {
                 if (currentAuthMode === 'register') {
@@ -345,8 +374,8 @@
 
         function enterDashboard(uid, email, familyName) {
             currentUser = { uid, email, familyName };
-            document.getElementById('authScreen').classList.add('hidden');
-            document.getElementById('appScreen').classList.remove('hidden');
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'flex';
             document.getElementById('headerFamilyName').textContent = familyName;
             document.getElementById('headerUserEmail').textContent = email;
 
@@ -357,7 +386,7 @@
                     snapshot.forEach(d => transactions.push({ id: d.id, ...d.data() }));
                     renderApp();
                 }, (error) => {
-                    document.getElementById('txTableBody').innerHTML = `<tr><td colspan="6" class="py-6 text-center text-rose-600 font-bold">❌ Chưa mở quyền Firestore Database Rules!</td></tr>`;
+                    document.getElementById('txTableBody').innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #e11d48; font-weight: bold;">❌ Chưa mở quyền Firestore Database Rules!</td></tr>`;
                 });
         }
 
@@ -371,7 +400,7 @@
             if (!currentUser || !db) return;
             const btn = e.target.querySelector('button[type="submit"]');
             btn.disabled = true;
-            btn.textContent = "Đang lưu lên Cloud...";
+            btn.textContent = "Đang lưu...";
 
             const newTx = {
                 type: currentTxType,
@@ -434,37 +463,46 @@
             ACCOUNT_LIST.forEach(acc => accBalances[acc] = 0);
             transactions.forEach(t => {
                 const acc = t.member || 'Tiền mặt';
-                if (!accBalances[acc]) accBalances[acc] = 0;
-                if (t.type === 'income') accBalances[acc] += Number(t.amount);
-                else accBalances[acc] -= Number(t.amount);
+                if (accBalances[acc] !== undefined) {
+                    if (t.type === 'income') accBalances[acc] += Number(t.amount);
+                    else accBalances[acc] -= Number(t.amount);
+                }
             });
 
             const grid = document.getElementById('accountBalancesGrid');
-            grid.innerHTML = ACCOUNT_LIST.map(acc => `
-                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                    <p class="text-[11px] font-bold text-slate-500 uppercase truncate">${acc}</p>
-                    <p class="text-sm font-black ${accBalances[acc] >= 0 ? 'text-slate-800' : 'text-rose-600'} mt-1">${formatVND(accBalances[acc])}</p>
-                </div>
-            `).join('');
+            grid.innerHTML = ACCOUNT_LIST.map(acc => {
+                const icon = ACCOUNT_ICONS[acc] || '💳';
+                const balance = accBalances[acc] || 0;
+                return `
+                    <div style="padding: 12px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; text-align: center;">
+                        <p style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin: 0 0 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${icon} ${acc}</p>
+                        <p style="font-size: 13px; font-weight: 900; color: ${balance >= 0 ? '#1e293b' : '#e11d48'}; margin: 0;">${formatVND(balance)}</p>
+                    </div>
+                `;
+            }).join('');
 
             const tbody = document.getElementById('txTableBody');
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 font-medium">Chưa có giao dịch nào trong kỳ này.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="padding: 32px; text-align: center; color: #94a3b8; font-weight: 500;">Chưa có giao dịch nào trong kỳ này.</td></tr>`;
             } else {
-                tbody.innerHTML = filtered.map(t => `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-50">
-                        <td class="py-3 px-3 text-slate-600 font-medium">${t.date || '-'}</td>
-                        <td class="py-3 px-3 font-bold text-slate-800">${t.category}</td>
-                        <td class="py-3 px-3 text-slate-600">${t.note}</td>
-                        <td class="py-3 px-3"><span class="px-2 py-1 rounded-md bg-slate-100 text-slate-700 font-bold text-[10px] uppercase">${t.member || 'Tiền mặt'}</span></td>
-                        <td class="py-3 px-3 text-right font-black text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
-                            ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
-                        </td>
-                        <td class="py-3 px-3 text-center">
-                            <button onclick="deleteTx('${t.id}')" class="text-rose-500 hover:text-rose-700 font-bold px-2">✕</button>
-                        </td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = filtered.map(t => {
+                    const accName = t.member || 'Tiền mặt';
+                    const icon = ACCOUNT_ICONS[accName] || '💳';
+                    return `
+                        <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;">
+                            <td style="padding: 12px; color: #475569; font-weight: 500;">${t.date || '-'}</td>
+                            <td style="padding: 12px; font-weight: bold; color: #1e293b;">${t.category}</td>
+                            <td style="padding: 12px; color: #475569;">${t.note}</td>
+                            <td style="padding: 12px;"><span style="padding: 2px 8px; border-radius: 6px; background: #f1f5f9; color: #334155; font-weight: bold; font-size: 10px; text-transform: uppercase;">${icon} ${accName}</span></td>
+                            <td style="padding: 12px; text-align: right; font-weight: 900; font-size: 13px; color: ${t.type === 'income' ? '#059669' : '#e11d48'};">
+                                ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
+                            </td>
+                            <td style="padding: 12px; text-align: center;">
+                                <button onclick="deleteTx('${t.id}')" style="background: transparent; border: none; color: #e11d48; font-weight: bold; cursor: pointer; padding: 4px 8px;">✕</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             }
 
             updateCharts(filtered);
@@ -486,32 +524,41 @@
                     labels: expLabels.length ? expLabels : ['Chưa có chi tiêu'],
                     datasets: [{
                         data: expValues.length ? expValues : [1],
-                        backgroundColor: expValues.length ? ['#f43f5e', '#fb923c', '#eab308', '#10b981', '#06b6d4', '#6366f1', '#a855f7'] : ['#e2e8f0']
+                        backgroundColor: expValues.length ? ['#f43f5e', '#fb923c', '#eab308', '#10b981', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#84cc16'] : ['#e2e8f0']
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
-            const incByAcc = ACCOUNT_LIST.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
-            const expByAcc = ACCOUNT_LIST.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
+            const activeAccs = ACCOUNT_LIST.filter(acc => {
+                return data.some(t => (t.member || 'Tiền mặt') === acc);
+            });
+            const chartLabels = activeAccs.length ? activeAccs : ACCOUNT_LIST;
+            const incByAcc = chartLabels.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
+            const expByAcc = chartLabels.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
 
             if (accountChartInstance) accountChartInstance.destroy();
             accountChartInstance = new Chart(document.getElementById('accountChart').getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: ACCOUNT_LIST,
+                    labels: chartLabels,
                     datasets: [
-                        { label: 'Thu nhập', data: incByAcc, backgroundColor: '#10b981', borderRadius: 6 },
-                        { label: 'Chi tiêu', data: expByAcc, backgroundColor: '#f43f5e', borderRadius: 6 }
+                        { label: 'Thu nhập', data: incByAcc, backgroundColor: '#059669', borderRadius: 6 },
+                        { label: 'Chi tiêu', data: expByAcc, backgroundColor: '#e11d48', borderRadius: 6 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { x: { ticks: { font: { size: 10 } } } }
+                }
             });
         }
 
         function exportCSV() {
             if (!transactions.length) return alert('Chưa có giao dịch nào để xuất!');
-            let csv = '\uFEFFNgày,Loại,Danh mục,Tài khoản,Số tiền,Ghi chú\n';
+            let csv = '\uFEFFNgày,Loại,Danh mục,Tài khoản / Ngân hàng,Số tiền,Ghi chú\n';
             transactions.forEach(t => {
                 csv += `${t.date || ''},${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'},"${t.category}","${t.member || 'Tiền mặt'}",${t.amount},"${t.note || ''}"\n`;
             });
