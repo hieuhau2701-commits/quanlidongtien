@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinFamily Cloud - Quản Lý Dòng Tiền & Tài Khoản</title>
+    <title>FinFamily Cloud - Quản Lý Dòng Tiền & Tài Khoản Ngân Hàng</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -12,45 +12,43 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 0; box-sizing: border-box; }
-        .loader { border-top-color: #10b981; animation: spinner 1s linear infinite; border-width: 2px; border-style: solid; border-radius: 50%; width: 1rem; height: 1rem; }
+        .loader { border-top-color: #10b981; animation: spinner 1s linear infinite; border-width: 2px; border-style: solid; border-radius: 50%; width: 1rem; height: 1rem; display: inline-block; }
         @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* CSS dự phòng khi mạng chặn CDN để web không bị vỡ giao diện */
-        .hidden { display: none !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
-    <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-800 to-slate-900" style="background: #1e293b; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
-        <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-8" style="max-width: 400px; width: 100%; background: #ffffff; border-radius: 24px; padding: 32px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);">
-            <div class="text-center mb-6" style="text-align: center; margin-bottom: 24px;">
-                <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500 flex items-center justify-center font-bold text-2xl text-white shadow-lg mb-4" style="width: 56px; height: 56px; margin: 0 auto 16px auto; background: #10b981; color: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">₫</div>
-                <h1 class="text-2xl font-bold text-slate-800" style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0;">FinFamily Cloud</h1>
-                <p class="text-xs text-slate-500 mt-1" style="font-size: 12px; color: #64748b; margin-top: 4px;">Quản lý Dòng tiền & Tài khoản Ngân hàng</p>
-                <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-medium text-slate-600" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 9999px; background: #f1f5f9; font-size: 11px;">
-                    <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; display: inline-block;"></span>
-                    <span id="connText">Đang kiểm tra kết nối...</span>
+    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ (Mặc định hiển thị flex để không bao giờ bị trắng trang) -->
+    <div id="authScreen" style="background: #1e293b; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; position: fixed; inset: 0; z-index: 50;">
+        <div style="max-width: 400px; width: 100%; background: #ffffff; border-radius: 24px; padding: 32px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="width: 56px; height: 56px; margin: 0 auto 16px auto; background: #10b981; color: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">₫</div>
+                <h1 style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0;">FinFamily Cloud</h1>
+                <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Quản lý Dòng tiền & Tài khoản Ngân hàng</p>
+                <div style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 9999px; background: #f1f5f9; font-size: 11px;">
+                    <span id="connDot" style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; display: inline-block;"></span>
+                    <span id="connText" style="color: #475569; font-weight: 500;">Đang khởi tạo kết nối...</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 24px;">
-                <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: #ffffff; border: none; cursor: pointer;">Đăng nhập</button>
-                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: transparent; color: #64748b; border: none; cursor: pointer;">Đăng ký mới</button>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 24px;">
+                <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: #ffffff; color: #1e293b; border: none; cursor: pointer; transition: 0.2s;">Đăng nhập</button>
+                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: transparent; color: #64748b; border: none; cursor: pointer; transition: 0.2s;">Đăng ký mới</button>
             </div>
 
-            <div id="authAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-bold border text-center" style="display: none; margin-bottom: 16px; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: bold; text-align: center;"></div>
+            <div id="authAlert" style="display: none; margin-bottom: 16px; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: bold; text-align: center;"></div>
 
-            <form id="authForm" class="space-y-4" style="display: flex; flex-direction: column; gap: 16px;">
-                <div id="familyNameGroup" class="hidden" style="display: none;">
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1" style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Tên Quỹ / Gia đình</label>
+            <form id="authForm" style="display: flex; flex-direction: column; gap: 16px;">
+                <div id="familyNameGroup" style="display: none;">
+                    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Tên Quỹ / Gia đình</label>
                     <input type="text" id="authFamilyName" placeholder="VD: Gia đình Phạm Hiếu" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; box-sizing: border-box;">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1" style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Địa chỉ Email</label>
+                    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Địa chỉ Email</label>
                     <input type="email" id="authEmail" required placeholder="email-cua-ban@gmail.com" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; box-sizing: border-box;">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1" style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Mật khẩu</label>
+                    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Mật khẩu</label>
                     <input type="password" id="authPassword" required minlength="6" placeholder="Tối thiểu 6 ký tự" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; box-sizing: border-box;">
                 </div>
                 <button type="submit" id="authSubmitBtn" style="width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; background: #059669; color: white; font-weight: bold; font-size: 14px; border: none; cursor: pointer; box-shadow: 0 10px 15px -3px rgb(5 150 105 / 0.3);">
@@ -61,21 +59,21 @@
     </div>
 
     <!-- MÀN HÌNH CHÍNH (DASHBOARD) -->
-    <div id="appScreen" class="hidden flex-1 flex flex-col" style="display: none; flex: 1; flex-direction: column;">
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm" style="background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 30; padding: 12px 16px;">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3" style="max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
-                <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 12px;">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg" style="width: 40px; height: 40px; border-radius: 12px; background: #059669; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">₫</div>
+    <div id="appScreen" style="display: none; flex: 1; flex-direction: column; min-height: 100vh;">
+        <header style="background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 30; padding: 12px 16px;">
+            <div style="max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: #059669; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">₫</div>
                     <div>
-                        <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
-                            <h1 id="headerFamilyName" class="font-bold text-slate-800 text-base" style="font-weight: bold; font-size: 16px; margin: 0;">Quỹ Gia Đình</h1>
-                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 uppercase" style="padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 9999px; background: #d1fae5; color: #047857;">Đã đồng bộ Cloud</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h1 id="headerFamilyName" style="font-weight: bold; font-size: 16px; margin: 0; color: #1e293b;">Quỹ Gia Đình</h1>
+                            <span style="padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 9999px; background: #d1fae5; color: #047857;">Đã đồng bộ Cloud</span>
                         </div>
-                        <p id="headerUserEmail" class="text-xs text-slate-500 font-medium" style="font-size: 12px; color: #64748b; margin: 0;">user@email.com</p>
+                        <p id="headerUserEmail" style="font-size: 12px; color: #64748b; margin: 0;">user@email.com</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
                     <input type="month" id="monthFilter" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; background: #f8fafc;">
                     <button onclick="exportCSV()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; font-size: 12px; cursor: pointer; font-weight: 500;">📥 Xuất Excel</button>
                     <button onclick="handleLogout()" style="padding: 6px 14px; border-radius: 8px; background: #fff1f2; color: #e11d48; font-size: 12px; font-weight: bold; border: none; cursor: pointer;">Đăng xuất</button>
@@ -83,7 +81,7 @@
             </div>
         </header>
 
-        <main class="max-w-7xl w-full mx-auto px-4 py-6 space-y-6 flex-1" style="max-width: 1280px; width: 100%; margin: 0 auto; padding: 24px 16px; flex: 1; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box;">
+        <main style="max-width: 1280px; width: 100%; margin: 0 auto; padding: 24px 16px; flex: 1; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box;">
             <!-- 4 Thẻ chỉ số tổng quan -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
                 <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
@@ -106,12 +104,12 @@
 
             <!-- SỐ DƯ CHI TIẾT THEO TỪNG TÀI KHOẢN / NGÂN HÀNG -->
             <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
-                <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0 0 12px 0;">💳 Số dư thực tế theo từng tài khoản / ngân hàng</h3>
-                <div id="accountBalancesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;"></div>
+                <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0 0 12px 0;">💳 Số dư thực tế theo từng tài khoản / ngân hàng / ví</h3>
+                <div id="accountBalancesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;"></div>
             </div>
 
             <!-- Form & Biểu đồ -->
-            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
                 <!-- Thêm giao dịch -->
                 <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
                     <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">➕ Ghi nhận giao dịch</h3>
@@ -138,15 +136,8 @@
                                 <select id="txCategory" style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;"></select>
                             </div>
                             <div>
-                                <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Tài khoản / Ngân hàng</label>
-                                <select id="txAccount" style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;">
-                                    <option value="Tiền mặt">💵 Tiền mặt</option>
-                                    <option value="MB Bank">🏦 MB Bank</option>
-                                    <option value="TP Bank">🏦 TP Bank</option>
-                                    <option value="Viettel Money">📱 Viettel Money</option>
-                                    <option value="ShopeePay">🛍️ ShopeePay</option>
-                                    <option value="Timo">💳 Timo</option>
-                                </select>
+                                <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Nguồn tiền / Ngân hàng</label>
+                                <select id="txAccount" style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;"></select>
                             </div>
                         </div>
 
@@ -167,7 +158,7 @@
                 </div>
 
                 <!-- Biểu đồ -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
                     <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
                         <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0 0 12px 0;">🍩 Cơ cấu Chi tiêu</h3>
                         <div style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px; position: relative;">
@@ -189,15 +180,7 @@
                     <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0;">📋 Lịch sử giao dịch đồng bộ</h3>
                     <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                         <input type="text" id="searchInput" oninput="renderApp()" placeholder="🔍 Tìm ghi chú, danh mục..." style="padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px;">
-                        <select id="filterAccount" onchange="renderApp()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; background: white;">
-                            <option value="ALL">Tất cả tài khoản</option>
-                            <option value="Tiền mặt">💵 Tiền mặt</option>
-                            <option value="MB Bank">🏦 MB Bank</option>
-                            <option value="TP Bank">🏦 TP Bank</option>
-                            <option value="Viettel Money">📱 Viettel Money</option>
-                            <option value="ShopeePay">🛍️ ShopeePay</option>
-                            <option value="Timo">💳 Timo</option>
-                        </select>
+                        <select id="filterAccount" onchange="renderApp()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; background: white;"></select>
                     </div>
                 </div>
                 <div style="overflow-x: auto;">
@@ -207,7 +190,7 @@
                                 <th style="padding: 10px 12px;">Ngày</th>
                                 <th style="padding: 10px 12px;">Danh mục</th>
                                 <th style="padding: 10px 12px;">Ghi chú</th>
-                                <th style="padding: 10px 12px;">Tài khoản / NH</th>
+                                <th style="padding: 10px 12px;">Tài khoản / Ngân hàng</th>
                                 <th style="padding: 10px 12px; text-align: right;">Số tiền</th>
                                 <th style="padding: 10px 12px; text-align: center;">Xóa</th>
                             </tr>
@@ -236,16 +219,66 @@
         let transactions = [];
         let expenseChartInstance = null, accountChartInstance = null;
 
-        const ACCOUNT_LIST = ['Tiền mặt', 'MB Bank', 'TP Bank', 'Viettel Money', 'ShopeePay', 'Timo'];
+        const ACCOUNT_ICONS = {
+            'Tiền mặt': '💵',
+            'MB Bank': '🏦',
+            'TP Bank': '🏦',
+            'Vietcombank': '🏦',
+            'Techcombank': '🏦',
+            'BIDV': '🏦',
+            'Agribank': '🏦',
+            'ACB': '🏦',
+            'VPBank': '🏦',
+            'Sacombank': '🏦',
+            'VIB': '🏦',
+            'SHB': '🏦',
+            'MSB': '🏦',
+            'Timo': '💳',
+            'MoMo': '📱',
+            'ZaloPay': '📱',
+            'Viettel Money': '📱',
+            'ShopeePay': '🛍️'
+        };
+        const ACCOUNT_LIST = Object.keys(ACCOUNT_ICONS);
+
         const CATEGORIES = {
             expense: ['Ăn uống & Đi chợ', 'Hóa đơn Điện/Nước/Net', 'Học phí & Con cái', 'Đi lại & Xăng xe', 'Y tế & Sức khỏe', 'Mua sắm gia đình', 'Chi phí khác'],
             income: ['Lương chính', 'Thưởng & Phụ cấp', 'Kinh doanh / Làm thêm', 'Lãi tiết kiệm / Đầu tư', 'Thu nhập khác']
         };
 
-        const todayStr = new Date().toISOString().split('T')[0];
-        document.getElementById('txDate').value = todayStr;
-        document.getElementById('monthFilter').value = todayStr.slice(0, 7);
-        document.getElementById('monthFilter').addEventListener('change', renderApp);
+        function initAccountSelects() {
+            try {
+                const txSelect = document.getElementById('txAccount');
+                const filterSelect = document.getElementById('filterAccount');
+                if (!txSelect || !filterSelect) return;
+                
+                let txOptions = '';
+                let filterOptions = '<option value="ALL">Tất cả tài khoản / Ngân hàng</option>';
+                
+                ACCOUNT_LIST.forEach(acc => {
+                    const icon = ACCOUNT_ICONS[acc] || '💳';
+                    txOptions += `<option value="${acc}">${icon} ${acc}</option>`;
+                    filterOptions += `<option value="${acc}">${icon} ${acc}</option>`;
+                });
+                
+                txSelect.innerHTML = txOptions;
+                filterSelect.innerHTML = filterOptions;
+            } catch (e) { console.error("Init selects error:", e); }
+        }
+
+        // Khởi tạo các giá trị mặc định ngay lập tức
+        window.addEventListener('DOMContentLoaded', () => {
+            initAccountSelects();
+            const todayStr = new Date().toISOString().split('T')[0];
+            const txDateEl = document.getElementById('txDate');
+            const monthFilterEl = document.getElementById('monthFilter');
+            if (txDateEl) txDateEl.value = todayStr;
+            if (monthFilterEl) {
+                monthFilterEl.value = todayStr.slice(0, 7);
+                monthFilterEl.addEventListener('change', renderApp);
+            }
+            setTxType('expense');
+        });
 
         function switchAuthTab(mode) {
             currentAuthMode = mode;
@@ -261,143 +294,201 @@
 
         function showAlert(msg, isError = true) {
             const box = document.getElementById('authAlert');
+            if (!box) return;
             box.textContent = msg;
             box.style.display = 'block';
             box.style.background = isError ? '#fff1f2' : '#ecfdf5';
             box.style.color = isError ? '#e11d48' : '#047857';
             box.style.borderColor = isError ? '#fecdd3' : '#a7f3d0';
         }
-        function hideAlert() { document.getElementById('authAlert').style.display = 'none'; }
+        function hideAlert() { 
+            const box = document.getElementById('authAlert');
+            if (box) box.style.display = 'none'; 
+        }
 
         function setTxType(type) {
             currentTxType = type;
-            document.getElementById('btnTypeExpense').style.background = type === 'expense' ? '#e11d48' : 'transparent';
-            document.getElementById('btnTypeExpense').style.color = type === 'expense' ? 'white' : '#475569';
-            document.getElementById('btnTypeIncome').style.background = type === 'income' ? '#059669' : 'transparent';
-            document.getElementById('btnTypeIncome').style.color = type === 'income' ? 'white' : '#475569';
-            document.getElementById('txCategory').innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
+            const btnExp = document.getElementById('btnTypeExpense');
+            const btnInc = document.getElementById('btnTypeIncome');
+            if (btnExp && btnInc) {
+                btnExp.style.background = type === 'expense' ? '#e11d48' : 'transparent';
+                btnExp.style.color = type === 'expense' ? 'white' : '#475569';
+                btnInc.style.background = type === 'income' ? '#059669' : 'transparent';
+                btnInc.style.color = type === 'income' ? 'white' : '#475569';
+            }
+            const catSelect = document.getElementById('txCategory');
+            if (catSelect && CATEGORIES[type]) {
+                catSelect.innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
+            }
         }
-        setTxType('expense');
 
         function quickAmount(val) {
             const input = document.getElementById('txAmount');
-            input.value = (Number(input.value) || 0) + val;
+            if (input) input.value = (Number(input.value) || 0) + val;
         }
 
+        // Khởi tạo Firebase an toàn tuyệt đối
         try {
             if (typeof firebase === 'undefined') throw new Error("Mạng đang chặn CDN Firebase.");
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             db = firebase.firestore();
 
-            document.getElementById('connDot').style.background = '#10b981';
-            document.getElementById('connText').innerHTML = '<span style="color: #047857; font-weight: bold;">✓ Đã kết nối Cloud</span>';
+            const connDot = document.getElementById('connDot');
+            const connText = document.getElementById('connText');
+            if (connDot) connDot.style.background = '#10b981';
+            if (connText) connText.innerHTML = '<span style="color: #047857; font-weight: bold;">✓ Đã kết nối Cloud</span>';
 
             auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    let familyName = user.displayName || 'Quỹ Gia Đình';
-                    try {
-                        const snap = await db.collection('family_profiles').doc(user.uid).get();
-                        if (snap.exists && snap.data().familyName) familyName = snap.data().familyName;
-                    } catch (e) {}
-                    enterDashboard(user.uid, user.email, familyName);
-                } else {
-                    document.getElementById('appScreen').style.display = 'none';
-                    document.getElementById('authScreen').style.display = 'flex';
+                try {
+                    if (user) {
+                        let familyName = user.displayName || 'Quỹ Gia Đình';
+                        try {
+                            const snap = await db.collection('family_profiles').doc(user.uid).get();
+                            if (snap.exists && snap.data().familyName) familyName = snap.data().familyName;
+                        } catch (e) {}
+                        enterDashboard(user.uid, user.email, familyName);
+                    } else {
+                        const appScr = document.getElementById('appScreen');
+                        const authScr = document.getElementById('authScreen');
+                        if (appScr) appScr.style.display = 'none';
+                        if (authScr) authScr.style.display = 'flex';
+                    }
+                } catch (innerErr) {
+                    console.error("Auth state change error:", innerErr);
                 }
             });
         } catch (err) {
-            document.getElementById('connDot').style.background = '#e11d48';
-            document.getElementById('connText').innerHTML = `<span style="color: #e11d48; font-weight: bold;">${err.message}</span>`;
+            const connDot = document.getElementById('connDot');
+            const connText = document.getElementById('connText');
+            if (connDot) connDot.style.background = '#e11d48';
+            if (connText) connText.innerHTML = `<span style="color: #e11d48; font-weight: bold;">${err.message}</span>`;
         }
 
-        document.getElementById('authForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            hideAlert();
-            if (!auth) return showAlert("❌ Chưa tải được thư viện Firebase!");
+        const authForm = document.getElementById('authForm');
+        if (authForm) {
+            authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideAlert();
+                if (!auth) return showAlert("❌ Chưa tải được thư viện Firebase!");
 
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-            const btn = document.getElementById('authSubmitBtn');
-            
-            btn.disabled = true;
-            btn.innerHTML = `Đang đồng bộ...`;
-
-            try {
-                if (currentAuthMode === 'register') {
-                    const famName = document.getElementById('authFamilyName').value.trim() || 'Quỹ Gia Đình';
-                    const cred = await auth.createUserWithEmailAndPassword(email, password);
-                    try { await cred.user.updateProfile({ displayName: famName }); } catch(e){}
-                    try { 
-                        await db.collection('family_profiles').doc(cred.user.uid).set({ 
-                            familyName: famName, email, createdAt: new Date().toISOString() 
-                        }); 
-                    } catch(e){}
-                    showAlert('✓ Tạo tài khoản Cloud thành công!', false);
-                } else {
-                    await auth.signInWithEmailAndPassword(email, password);
+                const emailField = document.getElementById('authEmail');
+                const passField = document.getElementById('authPassword');
+                const famNameField = document.getElementById('authFamilyName');
+                
+                const email = emailField ? emailField.value.trim() : '';
+                const password = passField ? passField.value : '';
+                const btn = document.getElementById('authSubmitBtn');
+                
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `Đang đồng bộ...`;
                 }
-            } catch (err) {
-                if (err.code === 'auth/email-already-in-use') showAlert('❌ Email này đã tồn tại! Hãy bấm sang tab Đăng nhập.');
-                else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') showAlert('❌ Email hoặc mật khẩu không đúng!');
-                else showAlert(`❌ Lỗi Firebase: ${err.message}`);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = currentAuthMode === 'register' ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
-            }
-        });
+
+                try {
+                    if (currentAuthMode === 'register') {
+                        const famName = famNameField && famNameField.value.trim() ? famNameField.value.trim() : 'Quỹ Gia Đình';
+                        const cred = await auth.createUserWithEmailAndPassword(email, password);
+                        try { await cred.user.updateProfile({ displayName: famName }); } catch(e){}
+                        try { 
+                            await db.collection('family_profiles').doc(cred.user.uid).set({ 
+                                familyName: famName, email, createdAt: new Date().toISOString() 
+                            }); 
+                        } catch(e){}
+                        showAlert('✓ Tạo tài khoản Cloud thành công!', false);
+                    } else {
+                        await auth.signInWithEmailAndPassword(email, password);
+                    }
+                } catch (err) {
+                    if (err.code === 'auth/email-already-in-use') showAlert('❌ Email này đã tồn tại! Hãy bấm sang tab Đăng nhập.');
+                    else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') showAlert('❌ Email hoặc mật khẩu không đúng!');
+                    else showAlert(`❌ Lỗi Firebase: ${err.message}`);
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = currentAuthMode === 'register' ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
+                    }
+                }
+            });
+        }
 
         function enterDashboard(uid, email, familyName) {
             currentUser = { uid, email, familyName };
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('appScreen').style.display = 'flex';
-            document.getElementById('headerFamilyName').textContent = familyName;
-            document.getElementById('headerUserEmail').textContent = email;
+            const authScr = document.getElementById('authScreen');
+            const appScr = document.getElementById('appScreen');
+            const famNameHeader = document.getElementById('headerFamilyName');
+            const userEmailHeader = document.getElementById('headerUserEmail');
+
+            if (authScr) authScr.style.display = 'none';
+            if (appScr) appScr.style.display = 'flex';
+            if (famNameHeader) famNameHeader.textContent = familyName;
+            if (userEmailHeader) userEmailHeader.textContent = email;
 
             if (unsubscribeFirestore) unsubscribeFirestore();
             unsubscribeFirestore = db.collection('families').doc(uid).collection('transactions')
                 .onSnapshot((snapshot) => {
-                    transactions = [];
-                    snapshot.forEach(d => transactions.push({ id: d.id, ...d.data() }));
-                    renderApp();
+                    try {
+                        transactions = [];
+                        snapshot.forEach(d => transactions.push({ id: d.id, ...d.data() }));
+                        renderApp();
+                    } catch (snapErr) {
+                        console.error("Snapshot process error:", snapErr);
+                    }
                 }, (error) => {
-                    document.getElementById('txTableBody').innerHTML = `<tr><td colspan="6" class="py-6 text-center" style="color: #e11d48; font-weight: bold;">❌ Chưa mở quyền Firestore Database Rules!</td></tr>`;
+                    const tbody = document.getElementById('txTableBody');
+                    if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #e11d48; font-weight: bold;">❌ Chưa mở quyền Firestore Database Rules hoặc chưa tạo Database!</td></tr>`;
                 });
         }
 
         async function handleLogout() {
-            if (unsubscribeFirestore) unsubscribeFirestore();
-            if (auth) await auth.signOut();
+            try {
+                if (unsubscribeFirestore) unsubscribeFirestore();
+                if (auth) await auth.signOut();
+            } catch (e) { console.error("Logout error:", e); }
         }
 
-        document.getElementById('txForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentUser || !db) return;
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.disabled = true;
-            btn.textContent = "Đang lưu...";
+        const txForm = document.getElementById('txForm');
+        if (txForm) {
+            txForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentUser || !db) return;
+                const btn = e.target.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = "Đang lưu...";
+                }
 
-            const newTx = {
-                type: currentTxType,
-                amount: Number(document.getElementById('txAmount').value),
-                category: document.getElementById('txCategory').value,
-                member: document.getElementById('txAccount').value,
-                date: document.getElementById('txDate').value,
-                note: document.getElementById('txNote').value.trim(),
-                createdAt: new Date().toISOString()
-            };
+                const amountEl = document.getElementById('txAmount');
+                const catEl = document.getElementById('txCategory');
+                const accEl = document.getElementById('txAccount');
+                const dateEl = document.getElementById('txDate');
+                const noteEl = document.getElementById('txNote');
+                const todayStr = new Date().toISOString().split('T')[0];
 
-            try {
-                await db.collection('families').doc(currentUser.uid).collection('transactions').add(newTx);
-                document.getElementById('txAmount').value = '';
-                document.getElementById('txNote').value = '';
-            } catch (err) {
-                alert("❌ Lỗi lưu dữ liệu: Hãy kiểm tra quyền Firestore Rules!");
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "☁️ Lưu lên Cloud";
-            }
-        });
+                const newTx = {
+                    type: currentTxType,
+                    amount: amountEl ? Number(amountEl.value) : 0,
+                    category: catEl ? catEl.value : '',
+                    member: accEl ? accEl.value : 'Tiền mặt',
+                    date: dateEl ? dateEl.value : todayStr,
+                    note: noteEl && noteEl.value ? noteEl.value.trim() : '',
+                    createdAt: new Date().toISOString()
+                };
+
+                try {
+                    await db.collection('families').doc(currentUser.uid).collection('transactions').add(newTx);
+                    if (amountEl) amountEl.value = '';
+                    if (noteEl) noteEl.value = '';
+                } catch (err) {
+                    alert("❌ Lỗi lưu dữ liệu: Hãy kiểm tra quyền Firestore Rules!");
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = "☁️ Lưu lên Cloud";
+                    }
+                }
+            });
+        }
 
         async function deleteTx(id) {
             if (!currentUser || !db) return;
@@ -411,111 +502,153 @@
         function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫'; }
 
         function renderApp() {
-            const selectedMonth = document.getElementById('monthFilter').value;
-            const searchKey = (document.getElementById('searchInput').value || '').toLowerCase();
-            const accountFilter = document.getElementById('filterAccount').value;
+            try {
+                const monthEl = document.getElementById('monthFilter');
+                const searchEl = document.getElementById('searchInput');
+                const filterAccEl = document.getElementById('filterAccount');
 
-            const filtered = transactions.filter(t => {
-                const matchMonth = !selectedMonth || (t.date && t.date.startsWith(selectedMonth));
-                const matchAccount = accountFilter === 'ALL' || t.member === accountFilter;
-                const matchSearch = !searchKey || 
-                    (t.note && t.note.toLowerCase().includes(searchKey)) || 
-                    (t.category && t.category.toLowerCase().includes(searchKey));
-                return matchMonth && matchAccount && matchSearch;
-            }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+                const selectedMonth = monthEl ? monthEl.value : '';
+                const searchKey = searchEl && searchEl.value ? searchEl.value.toLowerCase() : '';
+                const accountFilter = filterAccEl ? filterAccEl.value : 'ALL';
 
-            let inc = 0, exp = 0;
-            filtered.forEach(t => t.type === 'income' ? inc += Number(t.amount) : exp += Number(t.amount));
-            const bal = inc - exp;
-            const rate = inc > 0 ? Math.max(0, Math.round((bal / inc) * 100)) : 0;
+                const filtered = transactions.filter(t => {
+                    const matchMonth = !selectedMonth || (t.date && t.date.startsWith(selectedMonth));
+                    const matchAccount = accountFilter === 'ALL' || t.member === accountFilter;
+                    const matchSearch = !searchKey || 
+                        (t.note && t.note.toLowerCase().includes(searchKey)) || 
+                        (t.category && t.category.toLowerCase().includes(searchKey));
+                    return matchMonth && matchAccount && matchSearch;
+                }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-            document.getElementById('kpiIncome').textContent = formatVND(inc);
-            document.getElementById('kpiExpense').textContent = formatVND(exp);
-            document.getElementById('kpiBalance').textContent = formatVND(bal);
-            document.getElementById('kpiSavingRate').textContent = rate + '%';
+                let inc = 0, exp = 0;
+                filtered.forEach(t => t.type === 'income' ? inc += Number(t.amount) : exp += Number(t.amount));
+                const bal = inc - exp;
+                const rate = inc > 0 ? Math.max(0, Math.round((bal / inc) * 100)) : 0;
 
-            const accBalances = {};
-            ACCOUNT_LIST.forEach(acc => accBalances[acc] = 0);
-            transactions.forEach(t => {
-                const acc = t.member || 'Tiền mặt';
-                if (!accBalances[acc]) accBalances[acc] = 0;
-                if (t.type === 'income') accBalances[acc] += Number(t.amount);
-                else accBalances[acc] -= Number(t.amount);
-            });
+                const kpiInc = document.getElementById('kpiIncome');
+                const kpiExp = document.getElementById('kpiExpense');
+                const kpiBal = document.getElementById('kpiBalance');
+                const kpiRate = document.getElementById('kpiSavingRate');
+                if (kpiInc) kpiInc.textContent = formatVND(inc);
+                if (kpiExp) kpiExp.textContent = formatVND(exp);
+                if (kpiBal) kpiBal.textContent = formatVND(bal);
+                if (kpiRate) kpiRate.textContent = rate + '%';
 
-            const grid = document.getElementById('accountBalancesGrid');
-            grid.innerHTML = ACCOUNT_LIST.map(acc => `
-                <div style="padding: 12px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; text-align: center;">
-                    <p style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin: 0 0 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${acc}</p>
-                    <p style="font-size: 14px; font-weight: 900; color: ${accBalances[acc] >= 0 ? '#1e293b' : '#e11d48'}; margin: 0;">${formatVND(accBalances[acc])}</p>
-                </div>
-            `).join('');
+                const accBalances = {};
+                ACCOUNT_LIST.forEach(acc => accBalances[acc] = 0);
+                transactions.forEach(t => {
+                    const acc = t.member || 'Tiền mặt';
+                    if (accBalances[acc] !== undefined) {
+                        if (t.type === 'income') accBalances[acc] += Number(t.amount);
+                        else accBalances[acc] -= Number(t.amount);
+                    }
+                });
 
-            const tbody = document.getElementById('txTableBody');
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="padding: 32px; text-align: center; color: #94a3b8; font-weight: 500;">Chưa có giao dịch nào trong kỳ này.</td></tr>`;
-            } else {
-                tbody.innerHTML = filtered.map(t => `
-                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;">
-                        <td style="padding: 12px; color: #475569; font-weight: 500;">${t.date || '-'}</td>
-                        <td style="padding: 12px; font-weight: bold; color: #1e293b;">${t.category}</td>
-                        <td style="padding: 12px; color: #475569;">${t.note}</td>
-                        <td style="padding: 12px;"><span style="padding: 2px 8px; border-radius: 6px; background: #f1f5f9; color: #334155; font-weight: bold; font-size: 10px; text-transform: uppercase;">${t.member || 'Tiền mặt'}</span></td>
-                        <td style="padding: 12px; text-align: right; font-weight: 900; font-size: 13px; color: ${t.type === 'income' ? '#059669' : '#e11d48'};">
-                            ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
-                        </td>
-                        <td style="padding: 12px; text-align: center;">
-                            <button onclick="deleteTx('${t.id}')" style="background: transparent; border: none; color: #e11d48; font-weight: bold; cursor: pointer; padding: 4px 8px;">✕</button>
-                        </td>
-                    </tr>
-                `).join('');
+                const grid = document.getElementById('accountBalancesGrid');
+                if (grid) {
+                    grid.innerHTML = ACCOUNT_LIST.map(acc => {
+                        const icon = ACCOUNT_ICONS[acc] || '💳';
+                        const balance = accBalances[acc] || 0;
+                        return `
+                            <div style="padding: 12px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; text-align: center;">
+                                <p style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin: 0 0 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${icon} ${acc}</p>
+                                <p style="font-size: 13px; font-weight: 900; color: ${balance >= 0 ? '#1e293b' : '#e11d48'}; margin: 0;">${formatVND(balance)}</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                const tbody = document.getElementById('txTableBody');
+                if (tbody) {
+                    if (filtered.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" style="padding: 32px; text-align: center; color: #94a3b8; font-weight: 500;">Chưa có giao dịch nào trong kỳ này.</td></tr>`;
+                    } else {
+                        tbody.innerHTML = filtered.map(t => {
+                            const accName = t.member || 'Tiền mặt';
+                            const icon = ACCOUNT_ICONS[accName] || '💳';
+                            return `
+                                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;">
+                                    <td style="padding: 12px; color: #475569; font-weight: 500;">${t.date || '-'}</td>
+                                    <td style="padding: 12px; font-weight: bold; color: #1e293b;">${t.category}</td>
+                                    <td style="padding: 12px; color: #475569;">${t.note || ''}</td>
+                                    <td style="padding: 12px;"><span style="padding: 2px 8px; border-radius: 6px; background: #f1f5f9; color: #334155; font-weight: bold; font-size: 10px; text-transform: uppercase;">${icon} ${accName}</span></td>
+                                    <td style="padding: 12px; text-align: right; font-weight: 900; font-size: 13px; color: ${t.type === 'income' ? '#059669' : '#e11d48'};">
+                                        ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
+                                    </td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        <button onclick="deleteTx('${t.id}')" style="background: transparent; border: none; color: #e11d48; font-weight: bold; cursor: pointer; padding: 4px 8px;">✕</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                updateCharts(filtered);
+            } catch (err) {
+                console.error("Render app error:", err);
             }
-
-            updateCharts(filtered);
         }
 
         function updateCharts(data) {
-            if (typeof Chart === 'undefined') return;
-            const expMap = {};
-            data.filter(t => t.type === 'expense').forEach(t => {
-                expMap[t.category] = (expMap[t.category] || 0) + Number(t.amount);
-            });
-            const expLabels = Object.keys(expMap);
-            const expValues = Object.values(expMap);
+            try {
+                if (typeof Chart === 'undefined') return;
+                const expMap = {};
+                data.filter(t => t.type === 'expense').forEach(t => {
+                    expMap[t.category] = (expMap[t.category] || 0) + Number(t.amount);
+                });
+                const expLabels = Object.keys(expMap);
+                const expValues = Object.values(expMap);
 
-            if (expenseChartInstance) expenseChartInstance.destroy();
-            expenseChartInstance = new Chart(document.getElementById('expenseChart').getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: expLabels.length ? expLabels : ['Chưa có chi tiêu'],
-                    datasets: [{
-                        data: expValues.length ? expValues : [1],
-                        backgroundColor: expValues.length ? ['#f43f5e', '#fb923c', '#eab308', '#10b981', '#06b6d4', '#6366f1', '#a855f7'] : ['#e2e8f0']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-            });
+                const expCanvas = document.getElementById('expenseChart');
+                if (expCanvas) {
+                    if (expenseChartInstance) expenseChartInstance.destroy();
+                    expenseChartInstance = new Chart(expCanvas.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: expLabels.length ? expLabels : ['Chưa có chi tiêu'],
+                            datasets: [{
+                                data: expValues.length ? expValues : [1],
+                                backgroundColor: expValues.length ? ['#f43f5e', '#fb923c', '#eab308', '#10b981', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#84cc16'] : ['#e2e8f0']
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                    });
+                }
 
-            const incByAcc = ACCOUNT_LIST.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
-            const expByAcc = ACCOUNT_LIST.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
+                const activeAccs = ACCOUNT_LIST.filter(acc => {
+                    return data.some(t => (t.member || 'Tiền mặt') === acc);
+                });
+                const chartLabels = activeAccs.length ? activeAccs : ACCOUNT_LIST;
+                const incByAcc = chartLabels.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
+                const expByAcc = chartLabels.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
 
-            if (accountChartInstance) accountChartInstance.destroy();
-            accountChartInstance = new Chart(document.getElementById('accountChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: ACCOUNT_LIST,
-                    datasets: [
-                        { label: 'Thu nhập', data: incByAcc, backgroundColor: '#059669', borderRadius: 6 },
-                        { label: 'Chi tiêu', data: expByAcc, backgroundColor: '#e11d48', borderRadius: 6 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-            });
+                const accCanvas = document.getElementById('accountChart');
+                if (accCanvas) {
+                    if (accountChartInstance) accountChartInstance.destroy();
+                    accountChartInstance = new Chart(accCanvas.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [
+                                { label: 'Thu nhập', data: incByAcc, backgroundColor: '#059669', borderRadius: 6 },
+                                { label: 'Chi tiêu', data: expByAcc, backgroundColor: '#e11d48', borderRadius: 6 }
+                            ]
+                        },
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false, 
+                            plugins: { legend: { position: 'bottom' } },
+                            scales: { x: { ticks: { font: { size: 10 } } } }
+                        }
+                    });
+                }
+            } catch (e) { console.error("Chart error:", e); }
         }
 
         function exportCSV() {
             if (!transactions.length) return alert('Chưa có giao dịch nào để xuất!');
-            let csv = '\uFEFFNgày,Loại,Danh mục,Tài khoản,Số tiền,Ghi chú\n';
+            let csv = '\uFEFFNgày,Loại,Danh mục,Tài khoản / Ngân hàng,Số tiền,Ghi chú\n';
             transactions.forEach(t => {
                 csv += `${t.date || ''},${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'},"${t.category}","${t.member || 'Tiền mặt'}",${t.amount},"${t.note || ''}"\n`;
             });
