@@ -14,7 +14,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 0; box-sizing: border-box; }
         .loader { border-top-color: #10b981; animation: spinner 1s linear infinite; border-width: 2px; border-style: solid; border-radius: 50%; width: 1rem; height: 1rem; }
         @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
@@ -28,7 +27,7 @@
                 <p class="text-xs text-slate-500 mt-1" style="font-size: 12px; color: #64748b; margin-top: 4px;">Quản lý Dòng tiền & Tài khoản Ngân hàng</p>
                 <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-medium text-slate-600" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 9999px; background: #f1f5f9; font-size: 11px;">
                     <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; display: inline-block;"></span>
-                    <span id="connText">Đang kiểm tra kết nối...</span>
+                    <span id="connText">Đang khởi tạo kết nối...</span>
                 </div>
             </div>
 
@@ -266,16 +265,20 @@
                 filterSelect.innerHTML = filterOptions;
             } catch (e) { console.error("Init selects error:", e); }
         }
-        initAccountSelects();
 
-        const todayStr = new Date().toISOString().split('T')[0];
-        const txDateEl = document.getElementById('txDate');
-        const monthFilterEl = document.getElementById('monthFilter');
-        if (txDateEl) txDateEl.value = todayStr;
-        if (monthFilterEl) {
-            monthFilterEl.value = todayStr.slice(0, 7);
-            monthFilterEl.addEventListener('change', renderApp);
-        }
+        // Chạy ngay khi DOM sẵn sàng
+        window.addEventListener('DOMContentLoaded', () => {
+            initAccountSelects();
+            const todayStr = new Date().toISOString().split('T')[0];
+            const txDateEl = document.getElementById('txDate');
+            const monthFilterEl = document.getElementById('monthFilter');
+            if (txDateEl) txDateEl.value = todayStr;
+            if (monthFilterEl) {
+                monthFilterEl.value = todayStr.slice(0, 7);
+                monthFilterEl.addEventListener('change', renderApp);
+            }
+            setTxType('expense');
+        });
 
         function switchAuthTab(mode) {
             currentAuthMode = mode;
@@ -301,137 +304,186 @@
 
         function setTxType(type) {
             currentTxType = type;
-            document.getElementById('btnTypeExpense').style.background = type === 'expense' ? '#e11d48' : 'transparent';
-            document.getElementById('btnTypeExpense').style.color = type === 'expense' ? 'white' : '#475569';
-            document.getElementById('btnTypeIncome').style.background = type === 'income' ? '#059669' : 'transparent';
-            document.getElementById('btnTypeIncome').style.color = type === 'income' ? 'white' : '#475569';
+            const btnExp = document.getElementById('btnTypeExpense');
+            const btnInc = document.getElementById('btnTypeIncome');
+            if (btnExp && btnInc) {
+                btnExp.style.background = type === 'expense' ? '#e11d48' : 'transparent';
+                btnExp.style.color = type === 'expense' ? 'white' : '#475569';
+                btnInc.style.background = type === 'income' ? '#059669' : 'transparent';
+                btnInc.style.color = type === 'income' ? 'white' : '#475569';
+            }
             const catSelect = document.getElementById('txCategory');
             if (catSelect && CATEGORIES[type]) {
                 catSelect.innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
             }
         }
-        setTxType('expense');
 
         function quickAmount(val) {
             const input = document.getElementById('txAmount');
             if (input) input.value = (Number(input.value) || 0) + val;
         }
 
+        // Khởi tạo Firebase an toàn
         try {
             if (typeof firebase === 'undefined') throw new Error("Mạng đang chặn CDN Firebase.");
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             db = firebase.firestore();
 
-            document.getElementById('connDot').style.background = '#10b981';
-            document.getElementById('connText').innerHTML = '<span style="color: #047857; font-weight: bold;">✓ Đã kết nối Cloud</span>';
+            const connDot = document.getElementById('connDot');
+            const connText = document.getElementById('connText');
+            if (connDot) connDot.style.background = '#10b981';
+            if (connText) connText.innerHTML = '<span style="color: #047857; font-weight: bold;">✓ Đã kết nối Cloud</span>';
 
             auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    let familyName = user.displayName || 'Quỹ Gia Đình';
-                    try {
-                        const snap = await db.collection('family_profiles').doc(user.uid).get();
-                        if (snap.exists && snap.data().familyName) familyName = snap.data().familyName;
-                    } catch (e) {}
-                    enterDashboard(user.uid, user.email, familyName);
-                } else {
-                    document.getElementById('appScreen').style.display = 'none';
-                    document.getElementById('authScreen').style.display = 'flex';
+                try {
+                    if (user) {
+                        let familyName = user.displayName || 'Quỹ Gia Đình';
+                        try {
+                            const snap = await db.collection('family_profiles').doc(user.uid).get();
+                            if (snap.exists && snap.data().familyName) familyName = snap.data().familyName;
+                        } catch (e) {}
+                        enterDashboard(user.uid, user.email, familyName);
+                    } else {
+                        const appScr = document.getElementById('appScreen');
+                        const authScr = document.getElementById('authScreen');
+                        if (appScr) appScr.style.display = 'none';
+                        if (authScr) authScr.style.display = 'flex';
+                    }
+                } catch (innerErr) {
+                    console.error("Auth state change error:", innerErr);
                 }
             });
         } catch (err) {
-            document.getElementById('connDot').style.background = '#e11d48';
-            document.getElementById('connText').innerHTML = `<span style="color: #e11d48; font-weight: bold;">${err.message}</span>`;
+            const connDot = document.getElementById('connDot');
+            const connText = document.getElementById('connText');
+            if (connDot) connDot.style.background = '#e11d48';
+            if (connText) connText.innerHTML = `<span style="color: #e11d48; font-weight: bold;">${err.message}</span>`;
         }
 
-        document.getElementById('authForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            hideAlert();
-            if (!auth) return showAlert("❌ Chưa tải được thư viện Firebase!");
+        const authForm = document.getElementById('authForm');
+        if (authForm) {
+            authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideAlert();
+                if (!auth) return showAlert("❌ Chưa tải được thư viện Firebase!");
 
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-            const btn = document.getElementById('authSubmitBtn');
-            
-            btn.disabled = true;
-            btn.innerHTML = `Đang đồng bộ...`;
-
-            try {
-                if (currentAuthMode === 'register') {
-                    const famName = document.getElementById('authFamilyName').value.trim() || 'Quỹ Gia Đình';
-                    const cred = await auth.createUserWithEmailAndPassword(email, password);
-                    try { await cred.user.updateProfile({ displayName: famName }); } catch(e){}
-                    try { 
-                        await db.collection('family_profiles').doc(cred.user.uid).set({ 
-                            familyName: famName, email, createdAt: new Date().toISOString() 
-                        }); 
-                    } catch(e){}
-                    showAlert('✓ Tạo tài khoản Cloud thành công!', false);
-                } else {
-                    await auth.signInWithEmailAndPassword(email, password);
+                const emailField = document.getElementById('authEmail');
+                const passField = document.getElementById('authPassword');
+                const famNameField = document.getElementById('authFamilyName');
+                
+                const email = emailField ? emailField.value.trim() : '';
+                const password = passField ? passField.value : '';
+                const btn = document.getElementById('authSubmitBtn');
+                
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `Đang đồng bộ...`;
                 }
-            } catch (err) {
-                if (err.code === 'auth/email-already-in-use') showAlert('❌ Email này đã tồn tại! Hãy bấm sang tab Đăng nhập.');
-                else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') showAlert('❌ Email hoặc mật khẩu không đúng!');
-                else showAlert(`❌ Lỗi Firebase: ${err.message}`);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = currentAuthMode === 'register' ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
-            }
-        });
+
+                try {
+                    if (currentAuthMode === 'register') {
+                        const famName = famNameField && famNameField.value.trim() ? famNameField.value.trim() : 'Quỹ Gia Đình';
+                        const cred = await auth.createUserWithEmailAndPassword(email, password);
+                        try { await cred.user.updateProfile({ displayName: famName }); } catch(e){}
+                        try { 
+                            await db.collection('family_profiles').doc(cred.user.uid).set({ 
+                                familyName: famName, email, createdAt: new Date().toISOString() 
+                            }); 
+                        } catch(e){}
+                        showAlert('✓ Tạo tài khoản Cloud thành công!', false);
+                    } else {
+                        await auth.signInWithEmailAndPassword(email, password);
+                    }
+                } catch (err) {
+                    if (err.code === 'auth/email-already-in-use') showAlert('❌ Email này đã tồn tại! Hãy bấm sang tab Đăng nhập.');
+                    else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') showAlert('❌ Email hoặc mật khẩu không đúng!');
+                    else showAlert(`❌ Lỗi Firebase: ${err.message}`);
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = currentAuthMode === 'register' ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
+                    }
+                }
+            });
+        }
 
         function enterDashboard(uid, email, familyName) {
             currentUser = { uid, email, familyName };
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('appScreen').style.display = 'flex';
-            document.getElementById('headerFamilyName').textContent = familyName;
-            document.getElementById('headerUserEmail').textContent = email;
+            const authScr = document.getElementById('authScreen');
+            const appScr = document.getElementById('appScreen');
+            const famNameHeader = document.getElementById('headerFamilyName');
+            const userEmailHeader = document.getElementById('headerUserEmail');
+
+            if (authScr) authScr.style.display = 'none';
+            if (appScr) appScr.style.display = 'flex';
+            if (famNameHeader) famNameHeader.textContent = familyName;
+            if (userEmailHeader) userEmailHeader.textContent = email;
 
             if (unsubscribeFirestore) unsubscribeFirestore();
             unsubscribeFirestore = db.collection('families').doc(uid).collection('transactions')
                 .onSnapshot((snapshot) => {
-                    transactions = [];
-                    snapshot.forEach(d => transactions.push({ id: d.id, ...d.data() }));
-                    renderApp();
+                    try {
+                        transactions = [];
+                        snapshot.forEach(d => transactions.push({ id: d.id, ...d.data() }));
+                        renderApp();
+                    } catch (snapErr) {
+                        console.error("Snapshot process error:", snapErr);
+                    }
                 }, (error) => {
                     const tbody = document.getElementById('txTableBody');
-                    if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #e11d48; font-weight: bold;">❌ Chưa mở quyền Firestore Database Rules!</td></tr>`;
+                    if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #e11d48; font-weight: bold;">❌ Chưa mở quyền Firestore Database Rules hoặc chưa tạo Database!</td></tr>`;
                 });
         }
 
         async function handleLogout() {
-            if (unsubscribeFirestore) unsubscribeFirestore();
-            if (auth) await auth.signOut();
+            try {
+                if (unsubscribeFirestore) unsubscribeFirestore();
+                if (auth) await auth.signOut();
+            } catch (e) { console.error("Logout error:", e); }
         }
 
-        document.getElementById('txForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentUser || !db) return;
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.disabled = true;
-            btn.textContent = "Đang lưu...";
+        const txForm = document.getElementById('txForm');
+        if (txForm) {
+            txForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentUser || !db) return;
+                const btn = e.target.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = "Đang lưu...";
+                }
 
-            const newTx = {
-                type: currentTxType,
-                amount: Number(document.getElementById('txAmount').value),
-                category: document.getElementById('txCategory').value,
-                member: document.getElementById('txAccount').value,
-                date: document.getElementById('txDate').value,
-                note: document.getElementById('txNote').value.trim(),
-                createdAt: new Date().toISOString()
-            };
+                const amountEl = document.getElementById('txAmount');
+                const catEl = document.getElementById('txCategory');
+                const accEl = document.getElementById('txAccount');
+                const dateEl = document.getElementById('txDate');
+                const noteEl = document.getElementById('txNote');
 
-            try {
-                await db.collection('families').doc(currentUser.uid).collection('transactions').add(newTx);
-                document.getElementById('txAmount').value = '';
-                document.getElementById('txNote').value = '';
-            } catch (err) {
-                alert("❌ Lỗi lưu dữ liệu: Hãy kiểm tra quyền Firestore Rules!");
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "☁️ Lưu lên Cloud";
-            }
-        });
+                const newTx = {
+                    type: currentTxType,
+                    amount: amountEl ? Number(amountEl.value) : 0,
+                    category: catEl ? catEl.value : '',
+                    member: accEl ? accEl.value : 'Tiền mặt',
+                    date: dateEl ? dateEl.value : todayStr,
+                    note: noteEl && noteEl.value ? noteEl.value.trim() : '',
+                    createdAt: new Date().toISOString()
+                };
+
+                try {
+                    await db.collection('families').doc(currentUser.uid).collection('transactions').add(newTx);
+                    if (amountEl) amountEl.value = '';
+                    if (noteEl) noteEl.value = '';
+                } catch (err) {
+                    alert("❌ Lỗi lưu dữ liệu: Hãy kiểm tra quyền Firestore Rules!");
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = "☁️ Lưu lên Cloud";
+                    }
+                }
+            });
+        }
 
         async function deleteTx(id) {
             if (!currentUser || !db) return;
