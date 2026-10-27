@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinFamily Cloud - Quản Lý Dòng Tiền Gia Đình</title>
+    <title>Quản Lý Dòng Tiền & Tài Khoản</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Thư viện Firebase Compat ổn định cao -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -18,28 +17,23 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
-
-    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
     <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-800 to-slate-900">
         <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-8">
-            
             <div class="text-center mb-6">
                 <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500 flex items-center justify-center font-bold text-2xl text-white shadow-lg mb-4">₫</div>
-                <h1 class="text-2xl font-bold text-slate-800">FinFamily Cloud</h1>
-                <p class="text-xs text-slate-500 mt-1">Dự án: quanlidongtien-53a25</p>
+                <h1 class="text-2xl font-bold text-slate-800">QUANLIDONGTIEN</h1>
+                <p class="text-xs text-slate-500 mt-1">Quản lý Dòng tiền & Tài khoản Ngân hàng</p>
                 <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-medium text-slate-600">
                     <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                     <span id="connText">Đang kiểm tra kết nối...</span>
                 </div>
             </div>
 
-            <!-- Chuyển tab -->
             <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6">
                 <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2 text-sm font-semibold rounded-lg bg-white shadow text-slate-800 transition">Đăng nhập</button>
                 <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition">Đăng ký mới</button>
             </div>
 
-            <!-- Hộp thông báo lỗi / trạng thái -->
             <div id="authAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-bold border text-center"></div>
 
             <form id="authForm" class="space-y-4">
@@ -47,17 +41,14 @@
                     <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Tên Quỹ / Gia đình</label>
                     <input type="text" id="authFamilyName" placeholder="VD: Gia đình Phạm Hiếu" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Địa chỉ Email</label>
                     <input type="email" id="authEmail" required placeholder="email-cua-ban@gmail.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Mật khẩu</label>
                     <input type="password" id="authPassword" required minlength="6" placeholder="Tối thiểu 6 ký tự" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none text-sm">
                 </div>
-
                 <button type="submit" id="authSubmitBtn" class="w-full py-3.5 mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
                     <span>Đăng nhập đồng bộ Cloud</span>
                 </button>
@@ -91,7 +82,7 @@
         </header>
 
         <main class="max-w-7xl w-full mx-auto px-4 py-6 space-y-6 flex-1">
-            <!-- 4 Thẻ chỉ số -->
+            <!-- 4 Thẻ chỉ số tổng quan -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                     <p class="text-xs font-bold uppercase text-slate-400">Tổng Thu Nhập</p>
@@ -102,12 +93,20 @@
                     <p id="kpiExpense" class="text-2xl font-black text-rose-600 mt-1">0 ₫</p>
                 </div>
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-bold uppercase text-slate-400">Số Dư Thực Tế</p>
+                    <p class="text-xs font-bold uppercase text-slate-400">Số Dư Tổng Cộng</p>
                     <p id="kpiBalance" class="text-2xl font-black text-blue-600 mt-1">0 ₫</p>
                 </div>
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                     <p class="text-xs font-bold uppercase text-slate-400">Tỷ Lệ Tiết Kiệm</p>
                     <p id="kpiSavingRate" class="text-2xl font-black text-teal-600 mt-1">0%</p>
+                </div>
+            </div>
+
+            <!-- SỐ DƯ CHI TIẾT THEO TỪNG TÀI KHOẢN / NGÂN HÀNG -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 text-sm mb-3">💳 Số dư thực tế theo từng tài khoản / ngân hàng</h3>
+                <div id="accountBalancesGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <!-- Dữ liệu tự động đổ vào -->
                 </div>
             </div>
 
@@ -139,13 +138,14 @@
                                 <select id="txCategory" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white"></select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Thành viên</label>
-                                <select id="txMember" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white">
-                                    <option value="Quỹ Chung">🏠 Quỹ Chung</option>
-                                    <option value="Bố">👨 Bố</option>
-                                    <option value="Mẹ">👩 Mẹ</option>
-                                    <option value="Con cái">🧒 Con cái</option>
-                                    <option value="Ông Bà">👴 Ông Bà</option>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Tài khoản / Ngân hàng</label>
+                                <select id="txAccount" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white">
+                                    <option value="Tiền mặt">💵 Tiền mặt</option>
+                                    <option value="MB Bank">🏦 MB Bank</option>
+                                    <option value="TP Bank">🏦 TP Bank</option>
+                                    <option value="Viettel Money">📱 Viettel Money</option>
+                                    <option value="ShopeePay">🛍️ ShopeePay</option>
+                                    <option value="Timo">💳 Timo</option>
                                 </select>
                             </div>
                         </div>
@@ -157,7 +157,7 @@
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Ghi chú</label>
-                            <input type="text" id="txNote" required placeholder="Ví dụ: Tiền chợ, đóng tiền điện..." class="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:border-emerald-500 outline-none">
+                            <input type="text" id="txNote" required placeholder="Ví dụ: Tiền chợ, nhận lương..." class="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:border-emerald-500 outline-none">
                         </div>
 
                         <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition">
@@ -175,9 +175,9 @@
                         </div>
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                        <h3 class="font-bold text-slate-800 text-sm mb-3">📊 Thu - Chi theo Thành viên</h3>
+                        <h3 class="font-bold text-slate-800 text-sm mb-3">📊 Thu - Chi theo Tài khoản</h3>
                         <div class="flex-1 flex items-center justify-center min-h-[240px]">
-                            <canvas id="memberChart"></canvas>
+                            <canvas id="accountChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -189,13 +189,14 @@
                     <h3 class="font-bold text-slate-800 text-base">📋 Lịch sử giao dịch đồng bộ</h3>
                     <div class="flex flex-wrap items-center gap-2">
                         <input type="text" id="searchInput" oninput="renderApp()" placeholder="🔍 Tìm ghi chú, danh mục..." class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs">
-                        <select id="filterMember" onchange="renderApp()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white">
-                            <option value="ALL">Tất cả thành viên</option>
-                            <option value="Quỹ Chung">Quỹ Chung</option>
-                            <option value="Bố">Bố</option>
-                            <option value="Mẹ">Mẹ</option>
-                            <option value="Con cái">Con cái</option>
-                            <option value="Ông Bà">Ông Bà</option>
+                        <select id="filterAccount" onchange="renderApp()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white">
+                            <option value="ALL">Tất cả tài khoản</option>
+                            <option value="Tiền mặt">💵 Tiền mặt</option>
+                            <option value="MB Bank">🏦 MB Bank</option>
+                            <option value="TP Bank">🏦 TP Bank</option>
+                            <option value="Viettel Money">📱 Viettel Money</option>
+                            <option value="ShopeePay">🛍️ ShopeePay</option>
+                            <option value="Timo">💳 Timo</option>
                         </select>
                     </div>
                 </div>
@@ -206,7 +207,7 @@
                                 <th class="py-2.5 px-3">Ngày</th>
                                 <th class="py-2.5 px-3">Danh mục</th>
                                 <th class="py-2.5 px-3">Ghi chú</th>
-                                <th class="py-2.5 px-3">Thành viên</th>
+                                <th class="py-2.5 px-3">Tài khoản / NH</th>
                                 <th class="py-2.5 px-3 text-right">Số tiền</th>
                                 <th class="py-2.5 px-3 text-center">Xóa</th>
                             </tr>
@@ -219,34 +220,32 @@
     </div>
 
     <script>
-        // 1. CẤU HÌNH DỰ ÁN: quanlidongtien-53a25
-        const YOUR_FIREBASE_CONFIG = {
-            apiKey: ["AIzaSy", "CV4AetmA-0Cnu5ScPvdvdosz54Mogg9vQ"].join(""),
-            authDomain: "quanlidongtien-53a25.firebaseapp.com",
-            projectId: "quanlidongtien-53a25",
-            storageBucket: "quanlidongtien-53a25.firebasestorage.app",
-            messagingSenderId: "277992506032",
-            appId: "1:277992506032:web:d3992573d3d547d48b7175",
-            measurementId: "G-Y649WVZHPS"
-        };
-
+const firebaseConfig = {
+  apiKey: "AIzaSyCV4AetmA-0Cnu5ScPvdvdosz54Mogg9vQ",
+  authDomain: "quanlidongtien-53a25.firebaseapp.com",
+  databaseURL: "https://quanlidongtien-53a25-default-rtdb.firebaseio.com",
+  projectId: "quanlidongtien-53a25",
+  storageBucket: "quanlidongtien-53a25.firebasestorage.app",
+  messagingSenderId: "277992506032",
+  appId: "1:277992506032:web:d3992573d3d547d48b7175",
+  measurementId: "G-Y649WVZHPS"
+};
         let auth = null, db = null, currentUser = null, unsubscribeFirestore = null;
         let currentAuthMode = 'login', currentTxType = 'expense';
         let transactions = [];
-        let expenseChartInstance = null, memberChartInstance = null;
+        let expenseChartInstance = null, accountChartInstance = null;
 
+        const ACCOUNT_LIST = ['Tiền mặt', 'MB Bank', 'TP Bank', 'Viettel Money', 'ShopeePay', 'Timo'];
         const CATEGORIES = {
             expense: ['Ăn uống & Đi chợ', 'Hóa đơn Điện/Nước/Net', 'Học phí & Con cái', 'Đi lại & Xăng xe', 'Y tế & Sức khỏe', 'Mua sắm gia đình', 'Chi phí khác'],
             income: ['Lương chính', 'Thưởng & Phụ cấp', 'Kinh doanh / Làm thêm', 'Lãi tiết kiệm / Đầu tư', 'Thu nhập khác']
         };
 
-        // Khởi tạo ngày mặc định
         const todayStr = new Date().toISOString().split('T')[0];
         document.getElementById('txDate').value = todayStr;
         document.getElementById('monthFilter').value = todayStr.slice(0, 7);
         document.getElementById('monthFilter').addEventListener('change', renderApp);
 
-        // Chuyển tab Đăng nhập / Đăng ký (Hoạt động độc lập ngay lập tức)
         function switchAuthTab(mode) {
             currentAuthMode = mode;
             const isReg = mode === 'register';
@@ -278,19 +277,14 @@
             input.value = (Number(input.value) || 0) + val;
         }
 
-        // 2. KHỞI TẠO FIREBASE
         try {
-            if (typeof firebase === 'undefined') {
-                throw new Error("Mạng đang chặn tải thư viện gstatic.com. Hãy nhấn Ctrl+F5 hoặc đổi mạng!");
-            }
-            if (!firebase.apps.length) {
-                firebase.initializeApp(YOUR_FIREBASE_CONFIG);
-            }
+            if (typeof firebase === 'undefined') throw new Error("Lỗi kết nối thư viện Firebase.");
+            if (!firebase.apps.length) firebase.initializeApp(YOUR_FIREBASE_CONFIG);
             auth = firebase.auth();
             db = firebase.firestore();
 
             document.getElementById('connDot').className = 'w-2 h-2 rounded-full bg-emerald-500';
-            document.getElementById('connText').innerHTML = '<span class="text-emerald-600 font-bold">✓ Đã kết nối Cloud (quanlidongtien-53a25)</span>';
+            document.getElementById('connText').innerHTML = '<span class="text-emerald-600 font-bold">✓ Đã kết nối Cloud</span>';
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
@@ -310,11 +304,10 @@
             document.getElementById('connText').innerHTML = `<span class="text-rose-600 font-bold">${err.message}</span>`;
         }
 
-        // 3. ĐĂNG KÝ / ĐĂNG NHẬP LÊN CLOUD
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             hideAlert();
-            if (!auth) return showAlert("❌ Chưa tải được thư viện Firebase. Hãy tải lại trang (Ctrl + F5)!");
+            if (!auth) return showAlert("❌ Chưa tải được thư viện Firebase!");
 
             const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value;
@@ -338,25 +331,15 @@
                     await auth.signInWithEmailAndPassword(email, password);
                 }
             } catch (err) {
-                console.error(err);
-                if (err.code === 'auth/email-already-in-use') {
-                    showAlert('❌ Email này đã tồn tại! Hãy bấm sang tab Đăng nhập.');
-                } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-                    showAlert('❌ Email hoặc mật khẩu không đúng!');
-                } else if (err.code === 'auth/operation-not-allowed' || err.code === 'auth/configuration-not-found') {
-                    showAlert('❌ Bạn chưa bật Email/Password trong mục Authentication của dự án quanlidongtien-53a25!');
-                } else if (err.code === 'auth/unauthorized-domain') {
-                    showAlert('❌ Bạn chưa thêm tên miền hieuhau2701-commits.github.io vào mục Authorized domains!');
-                } else {
-                    showAlert(`❌ Lỗi Firebase (${err.code || 'Error'}): ${err.message}`);
-                }
+                if (err.code === 'auth/email-already-in-use') showAlert('❌ Email này đã tồn tại! Hãy bấm sang tab Đăng nhập.');
+                else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') showAlert('❌ Email hoặc mật khẩu không đúng!');
+                else showAlert(`❌ Lỗi Firebase: ${err.message}`);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = currentAuthMode === 'register' ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
             }
         });
 
-        // 4. VÀO DASHBOARD & ĐỒNG BỘ DỮ LIỆU
         function enterDashboard(uid, email, familyName) {
             currentUser = { uid, email, familyName };
             document.getElementById('authScreen').classList.add('hidden');
@@ -371,8 +354,7 @@
                     snapshot.forEach(d => transactions.push({ id: d.id, ...d.data() }));
                     renderApp();
                 }, (error) => {
-                    console.error("Firestore error:", error);
-                    document.getElementById('txTableBody').innerHTML = `<tr><td colspan="6" class="py-6 text-center text-rose-600 font-bold">❌ Bạn chưa tạo Firestore Database hoặc chưa mở Rules (allow read, write: if request.auth != null;) trong dự án mới!</td></tr>`;
+                    document.getElementById('txTableBody').innerHTML = `<tr><td colspan="6" class="py-6 text-center text-rose-600 font-bold">❌ Chưa mở quyền Firestore Database Rules!</td></tr>`;
                 });
         }
 
@@ -392,7 +374,7 @@
                 type: currentTxType,
                 amount: Number(document.getElementById('txAmount').value),
                 category: document.getElementById('txCategory').value,
-                member: document.getElementById('txMember').value,
+                member: document.getElementById('txAccount').value, // Lưu nguồn tài khoản vào trường member tương thích cơ sở dữ liệu cũ
                 date: document.getElementById('txDate').value,
                 note: document.getElementById('txNote').value.trim(),
                 createdAt: new Date().toISOString()
@@ -403,7 +385,7 @@
                 document.getElementById('txAmount').value = '';
                 document.getElementById('txNote').value = '';
             } catch (err) {
-                alert("❌ Lỗi lưu dữ liệu: Bạn hãy vào mục Firestore Database -> Rules trên Firebase để mở quyền đọc/ghi!");
+                alert("❌ Lỗi lưu dữ liệu: Hãy kiểm tra quyền Firestore Rules!");
             } finally {
                 btn.disabled = false;
                 btn.textContent = "☁️ Lưu lên Cloud";
@@ -424,15 +406,15 @@
         function renderApp() {
             const selectedMonth = document.getElementById('monthFilter').value;
             const searchKey = (document.getElementById('searchInput').value || '').toLowerCase();
-            const memberFilter = document.getElementById('filterMember').value;
+            const accountFilter = document.getElementById('filterAccount').value;
 
             const filtered = transactions.filter(t => {
                 const matchMonth = !selectedMonth || (t.date && t.date.startsWith(selectedMonth));
-                const matchMember = memberFilter === 'ALL' || t.member === memberFilter;
+                const matchAccount = accountFilter === 'ALL' || t.member === accountFilter;
                 const matchSearch = !searchKey || 
                     (t.note && t.note.toLowerCase().includes(searchKey)) || 
                     (t.category && t.category.toLowerCase().includes(searchKey));
-                return matchMonth && matchMember && matchSearch;
+                return matchMonth && matchAccount && matchSearch;
             }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
             let inc = 0, exp = 0;
@@ -445,6 +427,24 @@
             document.getElementById('kpiBalance').textContent = formatVND(bal);
             document.getElementById('kpiSavingRate').textContent = rate + '%';
 
+            // Tính số dư thực tế theo từng tài khoản từ toàn bộ dữ liệu (không phụ thuộc bộ lọc tháng để ra số dư thực tế tích lũy)
+            const accBalances = {};
+            ACCOUNT_LIST.forEach(acc => accBalances[acc] = 0);
+            transactions.forEach(t => {
+                const acc = t.member || 'Tiền mặt';
+                if (!accBalances[acc]) accBalances[acc] = 0;
+                if (t.type === 'income') accBalances[acc] += Number(t.amount);
+                else accBalances[acc] -= Number(t.amount);
+            });
+
+            const grid = document.getElementById('accountBalancesGrid');
+            grid.innerHTML = ACCOUNT_LIST.map(acc => `
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                    <p class="text-[11px] font-bold text-slate-500 uppercase truncate">${acc}</p>
+                    <p class="text-sm font-black ${accBalances[acc] >= 0 ? 'text-slate-800' : 'text-rose-600'} mt-1">${formatVND(accBalances[acc])}</p>
+                </div>
+            `).join('');
+
             const tbody = document.getElementById('txTableBody');
             if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 font-medium">Chưa có giao dịch nào trong kỳ này.</td></tr>`;
@@ -454,7 +454,7 @@
                         <td class="py-3 px-3 text-slate-600 font-medium">${t.date || '-'}</td>
                         <td class="py-3 px-3 font-bold text-slate-800">${t.category}</td>
                         <td class="py-3 px-3 text-slate-600">${t.note}</td>
-                        <td class="py-3 px-3"><span class="px-2 py-1 rounded-md bg-slate-100 text-slate-700 font-bold text-[10px] uppercase">${t.member}</span></td>
+                        <td class="py-3 px-3"><span class="px-2 py-1 rounded-md bg-slate-100 text-slate-700 font-bold text-[10px] uppercase">${t.member || 'Tiền mặt'}</span></td>
                         <td class="py-3 px-3 text-right font-black text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
                             ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
                         </td>
@@ -490,18 +490,17 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
-            const members = ['Quỹ Chung', 'Bố', 'Mẹ', 'Con cái', 'Ông Bà'];
-            const incByMem = members.map(m => data.filter(t => t.member === m && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
-            const expByMem = members.map(m => data.filter(t => t.member === m && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
+            const incByAcc = ACCOUNT_LIST.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
+            const expByAcc = ACCOUNT_LIST.map(acc => data.filter(t => (t.member || 'Tiền mặt') === acc && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
 
-            if (memberChartInstance) memberChartInstance.destroy();
-            memberChartInstance = new Chart(document.getElementById('memberChart').getContext('2d'), {
+            if (accountChartInstance) accountChartInstance.destroy();
+            accountChartInstance = new Chart(document.getElementById('accountChart').getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: members,
+                    labels: ACCOUNT_LIST,
                     datasets: [
-                        { label: 'Thu nhập', data: incByMem, backgroundColor: '#10b981', borderRadius: 6 },
-                        { label: 'Chi tiêu', data: expByMem, backgroundColor: '#f43f5e', borderRadius: 6 }
+                        { label: 'Thu nhập', data: incByAcc, backgroundColor: '#10b981', borderRadius: 6 },
+                        { label: 'Chi tiêu', data: expByAcc, backgroundColor: '#f43f5e', borderRadius: 6 }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
@@ -510,14 +509,14 @@
 
         function exportCSV() {
             if (!transactions.length) return alert('Chưa có giao dịch nào để xuất!');
-            let csv = '\uFEFFNgày,Loại,Danh mục,Thành viên,Số tiền,Ghi chú\n';
+            let csv = '\uFEFFNgày,Loại,Danh mục,Tài khoản,Số tiền,Ghi chú\n';
             transactions.forEach(t => {
-                csv += `${t.date || ''},${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'},"${t.category}","${t.member}",${t.amount},"${t.note || ''}"\n`;
+                csv += `${t.date || ''},${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'},"${t.category}","${t.member || 'Tiền mặt'}",${t.amount},"${t.note || ''}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `Bao_cao_dong_tien_${new Date().toISOString().slice(0,10)}.csv`;
+            link.download = `Bao_cao_tai_khoan_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
     </script>
