@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinFamily Cloud - Quản Lý Dòng Tiền & Giải Ngân</title>
+    <title>FinFamily Cloud - Quản Lý & Xét Duyệt Giải Ngân</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -22,7 +22,7 @@
             <div style="text-align: center; margin-bottom: 24px;">
                 <div style="width: 56px; height: 56px; margin: 0 auto 16px auto; background: #10b981; color: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">₫</div>
                 <h1 style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0;">FinFamily Cloud</h1>
-                <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Quản lý Dòng tiền & Giải ngân Quỹ Gia đình</p>
+                <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Hệ thống Quản lý Dòng tiền & Xét duyệt</p>
                 <div style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 9999px; background: #f1f5f9; font-size: 11px;">
                     <span id="connDot" style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; display: inline-block;"></span>
                     <span id="connText" style="color: #475569; font-weight: 500;">Đang kết nối...</span>
@@ -31,15 +31,15 @@
 
             <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 24px;">
                 <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: #ffffff; color: #1e293b; border: none; cursor: pointer;">Đăng nhập</button>
-                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: transparent; color: #64748b; border: none; cursor: pointer;">Đăng ký mới</button>
+                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" style="padding: 8px; font-size: 14px; font-weight: 600; border-radius: 8px; background: transparent; color: #64748b; border: none; cursor: pointer;">Đăng ký (User)</button>
             </div>
 
             <div id="authAlert" style="display: none; margin-bottom: 16px; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: bold; text-align: center;"></div>
 
             <form id="authForm" style="display: flex; flex-direction: column; gap: 16px;">
                 <div id="familyNameGroup" style="display: none;">
-                    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Tên Quỹ / Gia đình</label>
-                    <input type="text" id="authFamilyName" placeholder="VD: Gia đình Phạm Hiếu" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; box-sizing: border-box;">
+                    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Tên Quỹ / Thành viên</label>
+                    <input type="text" id="authFamilyName" placeholder="VD: Quỹ cá nhân Hiếu" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; box-sizing: border-box;">
                 </div>
                 <div>
                     <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block;">Địa chỉ Email</label>
@@ -56,8 +56,8 @@
         </div>
     </div>
 
-    <!-- MÀN HÌNH CHÍNH (DASHBOARD) -->
-    <div id="appScreen" style="display: none; flex: 1; flex-direction: column; min-height: 100vh; background-color: #f1f5f9;">
+    <!-- MÀN HÌNH CHÍNH USER -->
+    <div id="userAppScreen" style="display: none; flex: 1; flex-direction: column; min-height: 100vh; background-color: #f1f5f9;">
         <header style="background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 30; padding: 12px 16px;">
             <div style="max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -65,7 +65,7 @@
                     <div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <h1 id="headerFamilyName" style="font-weight: bold; font-size: 16px; margin: 0; color: #1e293b;">Quỹ Gia Đình</h1>
-                            <span style="padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 9999px; background: #d1fae5; color: #047857;">Cloud Sync</span>
+                            <span style="padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 9999px; background: #d1fae5; color: #047857;">Tài khoản User</span>
                         </div>
                         <p id="headerUserEmail" style="font-size: 12px; color: #64748b; margin: 0;">user@email.com</p>
                     </div>
@@ -100,10 +100,10 @@
                 </div>
             </div>
 
-            <!-- SỐ DƯ CHI TIẾT THEO TỪNG TÀI KHOẢN / NGÂN HÀNG -->
+            <!-- SỐ DƯ CHI TIẾT THEO TÀI KHOẢN -->
             <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0;">💳 Số dư thực tế theo tài khoản (Chỉ hiện tài khoản có tiền)</h3>
+                    <h3 style="font-weight: bold; font-size: 14px; color: #1e293b; margin: 0;">💳 Số dư thực tế theo tài khoản</h3>
                     <button onclick="toggleShowAllAccounts()" id="btnToggleAccounts" style="font-size: 12px; font-weight: 600; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; padding: 4px 12px; border-radius: 8px; cursor: pointer;">
                         👁️ Xem tất cả ngân hàng
                     </button>
@@ -111,10 +111,9 @@
                 <div id="accountBalancesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;"></div>
             </div>
 
-            <!-- HÀNG 3 Ô TÍNH NĂNG CHÍNH -->
+            <!-- 3 Ô CHỨC NĂNG NGƯỜI DÙNG -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-                
-                <!-- Ô 1: Ghi nhận giao dịch -->
+                <!-- Ô 1: Ghi nhận giao dịch cá nhân -->
                 <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
                     <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">➕ Ghi nhận giao dịch</h3>
                     <form id="txForm" style="display: flex; flex-direction: column; gap: 14px;">
@@ -122,112 +121,163 @@
                             <button type="button" id="btnTypeExpense" onclick="setTxType('expense')" style="padding: 8px; border-radius: 8px; font-size: 12px; font-weight: bold; background: #e11d48; color: white; border: none; cursor: pointer;">Khoản Chi (-)</button>
                             <button type="button" id="btnTypeIncome" onclick="setTxType('income')" style="padding: 8px; border-radius: 8px; font-size: 12px; font-weight: bold; background: transparent; color: #475569; border: none; cursor: pointer;">Khoản Thu (+)</button>
                         </div>
-
                         <div>
                             <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Số tiền (VNĐ)</label>
                             <input type="number" id="txAmount" required min="1000" step="1000" placeholder="Ví dụ: 500000" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; font-weight: bold; box-sizing: border-box;">
                         </div>
-
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                             <div>
                                 <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Danh mục</label>
                                 <select id="txCategory" style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;"></select>
                             </div>
                             <div>
-                                <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Tài khoản / Ngân hàng</label>
+                                <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Tài khoản</label>
                                 <select id="txAccount" style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;"></select>
                             </div>
                         </div>
-
                         <div>
-                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Ngày giao dịch</label>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Ngày</label>
                             <input type="date" id="txDate" required style="width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; box-sizing: border-box;">
                         </div>
-
                         <div>
-                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Ghi chú lý do</label>
-                            <input type="text" id="txNote" required placeholder="Ví dụ: Tiền chợ, nhận lương..." style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; box-sizing: border-box;">
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Ghi chú</label>
+                            <input type="text" id="txNote" required placeholder="Lý do..." style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; box-sizing: border-box;">
                         </div>
-
-                        <button type="submit" style="width: 100%; padding: 12px; border-radius: 12px; background: #059669; color: white; font-weight: bold; font-size: 13px; border: none; cursor: pointer;">
-                            ☁️ Lưu giao dịch
-                        </button>
+                        <button type="submit" style="width: 100%; padding: 12px; border-radius: 12px; background: #059669; color: white; font-weight: bold; font-size: 13px; border: none; cursor: pointer;">☁️ Lưu giao dịch</button>
                     </form>
                 </div>
 
-                <!-- Ô 2: Cập nhật số dư thực tế hiện tại -->
+                <!-- Ô 2: Cập nhật số dư thực tế -->
                 <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); display: flex; flex-direction: column;">
                     <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">📝 Cập nhật số dư thực tế</h3>
-                    <p style="font-size: 12px; color: #64748b; margin: 0 0 16px 0;">Điều chỉnh nhanh số dư tài khoản trùng khớp với thực tế trong app ngân hàng của bạn.</p>
-                    
                     <form id="updateBalanceForm" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
                         <div>
-                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Chọn Ngân hàng / Tài khoản</label>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Ngân hàng</label>
                             <select id="adjAccount" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: white; box-sizing: border-box;"></select>
                         </div>
                         <div>
                             <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Số dư thực tế mới (VNĐ)</label>
-                            <input type="number" id="adjNewBalance" required placeholder="Nhập số tiền chính xác hiện có" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; font-weight: bold; box-sizing: border-box;">
+                            <input type="number" id="adjNewBalance" required placeholder="Số tiền hiện có..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; font-weight: bold; box-sizing: border-box;">
                         </div>
-                        <button type="submit" style="width: 100%; padding: 12px; margin-top: auto; border-radius: 12px; background: #2563eb; color: white; font-weight: bold; font-size: 13px; border: none; cursor: pointer;">
-                            ⚡ Khớp số dư thực tế
-                        </button>
+                        <button type="submit" style="width: 100%; padding: 12px; margin-top: auto; border-radius: 12px; background: #2563eb; color: white; font-weight: bold; font-size: 13px; border: none; cursor: pointer;">⚡ Khớp số dư thực tế</button>
                     </form>
                 </div>
 
-                <!-- Ô 3: Xét duyệt giải ngân khoản chi & Tạo văn bản -->
+                <!-- Ô 3: Gửi đơn xét duyệt giải ngân cho Admin -->
                 <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); display: flex; flex-direction: column;">
-                    <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">⚖️ Xét duyệt giải ngân khoản chi</h3>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">📨 Gửi đơn xét duyệt giải ngân</h3>
+                    <form id="approvalForm" style="display: flex; flex-direction: column; gap: 12px; flex: 1;">
                         <div>
-                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Số tiền chi đề xuất (VNĐ)</label>
-                            <input type="number" id="apprAmount" oninput="processApproval()" placeholder="Ví dụ: 2000000" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; font-weight: bold; box-sizing: border-box;">
-                        </div>
-                        <div>
-                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Lý do chi giải ngân</label>
-                            <input type="text" id="apprReason" oninput="processApproval()" placeholder="Ví dụ: Thanh toán hóa đơn điện / mua đồ gia dụng..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; box-sizing: border-box;">
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Số tiền xin cấp (VNĐ)</label>
+                            <input type="number" id="reqAmount" required min="1000" placeholder="Số tiền..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; font-weight: bold; box-sizing: border-box;">
                         </div>
                         <div>
-                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Tài khoản đủ điều kiện trích tiền</label>
-                            <select id="apprSourceAcc" onchange="processApproval()" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; background: #f8fafc; font-weight: bold; box-sizing: border-box;"></select>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Tài khoản nhận / Trích</label>
+                            <select id="reqAccount" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; background: white; box-sizing: border-box;"></select>
                         </div>
-                    </div>
-
-                    <!-- Khung văn bản tờ trình giải ngân -->
-                    <div style="margin-top: 14px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 12px; font-size: 12px; color: #334155; position: relative;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <span style="font-size: 10px; font-weight: bold; uppercase; color: #64748b;">📄 Mẫu Tờ Trình Xét Duyệt</span>
-                            <button onclick="copyApprovalDoc()" style="padding: 2px 8px; font-size: 10px; font-weight: bold; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer;">📋 Copy Tờ Trình</button>
+                        <div>
+                            <label style="font-size: 11px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Lý do xin giải ngân</label>
+                            <textarea id="reqReason" required rows="2" placeholder="Nêu rõ mục đích chi..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; box-sizing: border-box;"></textarea>
                         </div>
-                        <pre id="approvalDocText" style="white-space: pre-wrap; font-family: inherit; margin: 0; font-size: 11px; line-height: 1.5; color: #1e293b;">Vui lòng nhập số tiền và lý do chi để tạo tờ trình...</pre>
-                    </div>
+                        <button type="submit" style="width: 100%; padding: 12px; margin-top: auto; border-radius: 12px; background: #d97706; color: white; font-weight: bold; font-size: 13px; border: none; cursor: pointer;">📤 Gửi đơn đến Admin</button>
+                    </form>
                 </div>
-
             </div>
 
-            <!-- Bảng lịch sử -->
-            <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0;">
-                <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
-                    <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0;">📋 Lịch sử giao dịch đồng bộ</h3>
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-                        <input type="text" id="searchInput" oninput="renderApp()" placeholder="🔍 Tìm ghi chú, danh mục..." style="padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px;">
-                        <select id="filterAccount" onchange="renderApp()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; background: white;"></select>
+            <!-- BẢNG ĐƠN XÉT DUYỆT CỦA USER VÀ LỊCH SỬ -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0;">
+                    <h3 style="font-weight: bold; font-size: 15px; color: #1e293b; margin: 0 0 16px 0;">⏳ Trạng thái các đơn xét duyệt của bạn</h3>
+                    <div style="overflow-x: auto; max-height: 250px; overflow-y: auto;">
+                        <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #94a3b8;">
+                                    <th style="padding: 8px;">Ngày</th>
+                                    <th style="padding: 8px;">Lý do</th>
+                                    <th style="padding: 8px; text-align: right;">Số tiền</th>
+                                    <th style="padding: 8px; text-align: center;">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userRequestsTableBody" style="font-size: 12px;"></tbody>
+                        </table>
                     </div>
                 </div>
+
+                <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0;">
+                    <h3 style="font-weight: bold; font-size: 15px; color: #1e293b; margin: 0 0 16px 0;">📋 Lịch sử giao dịch cá nhân</h3>
+                    <div style="overflow-x: auto; max-height: 250px; overflow-y: auto;">
+                        <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #94a3b8;">
+                                    <th style="padding: 8px;">Ngày</th>
+                                    <th style="padding: 8px;">Danh mục</th>
+                                    <th style="padding: 8px;">Ghi chú</th>
+                                    <th style="padding: 8px; text-align: right;">Số tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="txTableBody" style="font-size: 12px;"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MÀN HÌNH CHÍNH ADMIN -->
+    <div id="adminAppScreen" style="display: none; flex: 1; flex-direction: column; min-height: 100vh; background-color: #f1f5f9;">
+        <header style="background: #0f172a; color: white; border-bottom: 1px solid #334155; position: sticky; top: 0; z-index: 30; padding: 12px 16px;">
+            <div style="max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: #dc2626; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">👑</div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h1 style="font-weight: bold; font-size: 16px; margin: 0;">Cổng Quản Trị Admin</h1>
+                            <span style="padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 9999px; background: #fee2e2; color: #b91c1c;">Administrator</span>
+                        </div>
+                        <p id="adminEmail" style="font-size: 12px; color: #94a3b8; margin: 0;">admin@email.com</p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" style="padding: 6px 14px; border-radius: 8px; background: #ef4444; color: white; font-size: 12px; font-weight: bold; border: none; cursor: pointer;">Đăng xuất</button>
+            </div>
+        </header>
+
+        <main style="max-width: 1280px; width: 100%; margin: 0 auto; padding: 24px 16px; flex: 1; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box;">
+            <!-- Danh sách đơn xét duyệt chờ duyệt từ tất cả người dùng -->
+            <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+                <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">🔔 Danh sách đơn xét duyệt giải ngân từ Người dùng</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #94a3b8;">
+                                <th style="padding: 10px 12px;">Ngày gửi</th>
+                                <th style="padding: 10px 12px;">Người dùng (Email)</th>
+                                <th style="padding: 10px 12px;">Tài khoản nhận</th>
+                                <th style="padding: 10px 12px;">Lý do giải ngân</th>
+                                <th style="padding: 10px 12px; text-align: right;">Số tiền</th>
+                                <th style="padding: 10px 12px; text-align: center;">Thao tác xét duyệt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminRequestsTableBody" style="font-size: 12px;"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Xem chi tiêu tất cả người dùng -->
+            <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0;">
+                <h3 style="font-weight: bold; font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">📊 Toàn bộ giao dịch của tất cả người dùng hệ thống</h3>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; text-align: left; border-collapse: collapse;">
                         <thead>
                             <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #94a3b8;">
                                 <th style="padding: 10px 12px;">Ngày</th>
+                                <th style="padding: 10px 12px;">Thành viên</th>
+                                <th style="padding: 10px 12px;">Loại</th>
                                 <th style="padding: 10px 12px;">Danh mục</th>
                                 <th style="padding: 10px 12px;">Ghi chú</th>
-                                <th style="padding: 10px 12px;">Tài khoản / Ngân hàng</th>
                                 <th style="padding: 10px 12px; text-align: right;">Số tiền</th>
-                                <th style="padding: 10px 12px; text-align: center;">Xóa</th>
                             </tr>
                         </thead>
-                        <tbody id="txTableBody" style="font-size: 12px;"></tbody>
+                        <tbody id="adminAllTxTableBody" style="font-size: 12px;"></tbody>
                     </table>
                 </div>
             </div>
@@ -246,33 +296,20 @@
             measurementId: "G-Y649WVZHPS"
         };
 
-        let auth = null, db = null, currentUser = null, unsubscribeFirestore = null;
+        let auth = null, db = null, currentUser = null, userRole = 'user';
+        let unsubscribeFirestore = null, unsubscribeRequests = null, unsubscribeAdminAll = null;
         let currentAuthMode = 'login', currentTxType = 'expense';
-        let transactions = [];
+        let transactions = [], userRequests = [], allSystemRequests = [], allSystemTransactions = [];
         let showAllAccounts = false;
 
         const ACCOUNT_ICONS = {
-            'Tiền mặt': '💵',
-            'MB Bank': '🏦',
-            'TP Bank': '🏦',
-            'Vietcombank': '🏦',
-            'Techcombank': '🏦',
-            'BIDV': '🏦',
-            'Agribank': '🏦',
-            'ACB': '🏦',
-            'VPBank': '🏦',
-            'Sacombank': '🏦',
-            'VIB': '🏦',
-            'SHB': '🏦',
-            'MSB': '🏦',
-            'Timo': '💳',
-            'MoMo': '📱',
-            'ZaloPay': '📱',
-            'Viettel Money': '📱',
-            'ShopeePay': '🛍️'
+            'Tiền mặt': '💵', 'MB Bank': '🏦', 'TP Bank': '🏦', 'Vietcombank': '🏦',
+            'Techcombank': '🏦', 'BIDV': '🏦', 'Agribank': '🏦', 'ACB': '🏦',
+            'VPBank': '🏦', 'Sacombank': '🏦', 'VIB': '🏦', 'SHB': '🏦',
+            'MSB': '🏦', 'Timo': '💳', 'MoMo': '📱', 'ZaloPay': '📱',
+            'Viettel Money': '📱', 'ShopeePay': '🛍️'
         };
         const ACCOUNT_LIST = Object.keys(ACCOUNT_ICONS);
-
         const CATEGORIES = {
             expense: ['Ăn uống & Đi chợ', 'Hóa đơn Điện/Nước/Net', 'Học phí & Con cái', 'Đi lại & Xăng xe', 'Y tế & Sức khỏe', 'Mua sắm gia đình', 'Cập nhật số dư', 'Chi phí khác'],
             income: ['Lương chính', 'Thưởng & Phụ cấp', 'Kinh doanh / Làm thêm', 'Lãi tiết kiệm / Đầu tư', 'Cập nhật số dư', 'Thu nhập khác']
@@ -281,22 +318,17 @@
         function initAccountSelects() {
             try {
                 const txSelect = document.getElementById('txAccount');
-                const filterSelect = document.getElementById('filterAccount');
                 const adjSelect = document.getElementById('adjAccount');
-                if (!txSelect || !filterSelect || !adjSelect) return;
+                const reqSelect = document.getElementById('reqAccount');
+                if (!txSelect || !adjSelect || !reqSelect) return;
                 
-                let txOptions = '';
-                let filterOptions = '<option value="ALL">Tất cả tài khoản / Ngân hàng</option>';
-                
+                let options = '';
                 ACCOUNT_LIST.forEach(acc => {
-                    const icon = ACCOUNT_ICONS[acc] || '💳';
-                    txOptions += `<option value="${acc}">${icon} ${acc}</option>`;
-                    filterOptions += `<option value="${acc}">${icon} ${acc}</option>`;
+                    options += `<option value="${acc}">${ACCOUNT_ICONS[acc]} ${acc}</option>`;
                 });
-                
-                txSelect.innerHTML = txOptions;
-                filterSelect.innerHTML = filterOptions;
-                adjSelect.innerHTML = txOptions;
+                txSelect.innerHTML = options;
+                adjSelect.innerHTML = options;
+                reqSelect.innerHTML = options;
             } catch (e) { console.error("Init selects error:", e); }
         }
 
@@ -308,7 +340,7 @@
             if (txDateEl) txDateEl.value = todayStr;
             if (monthFilterEl) {
                 monthFilterEl.value = todayStr.slice(0, 7);
-                monthFilterEl.addEventListener('change', renderApp);
+                monthFilterEl.addEventListener('change', renderUserApp);
             }
             setTxType('expense');
         });
@@ -317,7 +349,7 @@
             currentAuthMode = mode;
             const isReg = mode === 'register';
             document.getElementById('familyNameGroup').style.display = isReg ? 'block' : 'none';
-            document.getElementById('authSubmitBtn').innerHTML = isReg ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
+            document.getElementById('authSubmitBtn').innerHTML = isReg ? '<span>Tạo tài khoản User mới</span>' : '<span>Đăng nhập hệ thống</span>';
             document.getElementById('tabLoginBtn').style.background = !isReg ? '#ffffff' : 'transparent';
             document.getElementById('tabLoginBtn').style.color = !isReg ? '#1e293b' : '#64748b';
             document.getElementById('tabRegisterBtn').style.background = isReg ? '#ffffff' : 'transparent';
@@ -359,229 +391,234 @@
             showAllAccounts = !showAllAccounts;
             const btn = document.getElementById('btnToggleAccounts');
             if (btn) btn.textContent = showAllAccounts ? "🙈 Ẩn bớt ngân hàng 0đ" : "👁️ Xem tất cả ngân hàng";
-            renderApp();
+            renderUserApp();
         }
 
-        // Cấu hình Firebase
+        // Firebase Init
         try {
-            if (typeof firebase === 'undefined') throw new Error("Mạng đang chặn CDN Firebase.");
+            if (typeof firebase === 'undefined') throw new Error("Mạng chặn CDN Firebase.");
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             db = firebase.firestore();
 
-            const connDot = document.getElementById('connDot');
-            const connText = document.getElementById('connText');
-            if (connDot) connDot.style.background = '#10b981';
-            if (connText) connText.innerHTML = '<span style="color: #047857; font-weight: bold;">✓ Đã kết nối Cloud</span>';
+            document.getElementById('connDot').style.background = '#10b981';
+            document.getElementById('connText').innerHTML = '<span style="color: #047857; font-weight: bold;">✓ Đã kết nối Cloud</span>';
 
             auth.onAuthStateChanged(async (user) => {
                 try {
                     if (user) {
-                        let familyName = user.displayName || 'Quỹ Gia Đình';
+                        currentUser = user;
+                        // Kiểm tra quyền Role trong Firestore
+                        let role = 'user';
+                        let familyName = user.displayName || 'Quỹ Cá Nhân';
                         try {
-                            const snap = await db.collection('family_profiles').doc(user.uid).get();
-                            if (snap.exists && snap.data().familyName) familyName = snap.data().familyName;
-                        } catch (e) {}
-                        enterDashboard(user.uid, user.email, familyName);
+                            const profileDoc = await db.collection('family_profiles').doc(user.uid).get();
+                            if (profileDoc.exists) {
+                                const data = profileDoc.data();
+                                if (data.role) role = data.role;
+                                if (data.familyName) familyName = data.familyName;
+                            }
+                        } catch (e) { console.error(e); }
+
+                        userRole = role;
+                        if (userRole === 'admin') {
+                            enterAdminDashboard(user.email);
+                        } else {
+                            enterUserDashboard(user.uid, user.email, familyName);
+                        }
                     } else {
-                        const appScr = document.getElementById('appScreen');
-                        const authScr = document.getElementById('authScreen');
-                        if (appScr) appScr.style.display = 'none';
-                        if (authScr) authScr.style.display = 'flex';
+                        document.getElementById('userAppScreen').style.display = 'none';
+                        document.getElementById('adminAppScreen').style.display = 'none';
+                        document.getElementById('authScreen').style.display = 'flex';
                     }
-                } catch (innerErr) {
-                    console.error("Auth state change error:", innerErr);
-                }
+                } catch (err) { console.error(err); }
             });
         } catch (err) {
-            const connDot = document.getElementById('connDot');
-            const connText = document.getElementById('connText');
-            if (connDot) connDot.style.background = '#e11d48';
-            if (connText) connText.innerHTML = `<span style="color: #e11d48; font-weight: bold;">${err.message}</span>`;
+            document.getElementById('connDot').style.background = '#e11d48';
+            document.getElementById('connText').innerHTML = `<span style="color: #e11d48; font-weight: bold;">${err.message}</span>`;
         }
 
-        const authForm = document.getElementById('authForm');
-        if (authForm) {
-            authForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                hideAlert();
-                if (!auth) return showAlert("❌ Chưa tải được thư viện Firebase!");
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+            if (!auth) return showAlert("Chưa tải được Firebase!");
 
-                const emailField = document.getElementById('authEmail');
-                const passField = document.getElementById('authPassword');
-                const famNameField = document.getElementById('authFamilyName');
-                
-                const email = emailField ? emailField.value.trim() : '';
-                const password = passField ? passField.value : '';
-                const btn = document.getElementById('authSubmitBtn');
-                
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerHTML = `Đang đồng bộ...`;
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const btn = document.getElementById('authSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `Đang xử lý...`;
+
+            try {
+                if (currentAuthMode === 'register') {
+                    const famName = document.getElementById('authFamilyName').value.trim() || 'Quỹ Cá Nhân';
+                    const cred = await auth.createUserWithEmailAndPassword(email, password);
+                    try { await cred.user.updateProfile({ displayName: famName }); } catch(e){}
+                    // Tạo profile mặc định là user
+                    await db.collection('family_profiles').doc(cred.user.uid).set({ 
+                        familyName: famName, email, role: 'user', createdAt: new Date().toISOString() 
+                    });
+                    showAlert('✓ Đăng ký tài khoản User thành công!', false);
+                } else {
+                    await auth.signInWithEmailAndPassword(email, password);
                 }
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') showAlert('❌ Email đã tồn tại! Hãy chuyển sang Đăng nhập.');
+                else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') showAlert('❌ Sai email hoặc mật khẩu!');
+                else showAlert(`❌ Lỗi: ${err.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = currentAuthMode === 'register' ? '<span>Tạo tài khoản User mới</span>' : '<span>Đăng nhập hệ thống</span>';
+            }
+        });
 
-                try {
-                    if (currentAuthMode === 'register') {
-                        const famName = famNameField && famNameField.value.trim() ? famNameField.value.trim() : 'Quỹ Gia Đình';
-                        const cred = await auth.createUserWithEmailAndPassword(email, password);
-                        try { await cred.user.updateProfile({ displayName: famName }); } catch(e){}
-                        try { 
-                            await db.collection('family_profiles').doc(cred.user.uid).set({ 
-                                familyName: famName, email, createdAt: new Date().toISOString() 
-                            }); 
-                        } catch(e){}
-                        showAlert('✓ Tạo tài khoản Cloud thành công!', false);
-                    } else {
-                        await auth.signInWithEmailAndPassword(email, password);
-                    }
-                } catch (err) {
-                    if (err.code === 'auth/email-already-in-use') showAlert('❌ Email này đã tồn tại! Hãy bấm sang tab Đăng nhập.');
-                    else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') showAlert('❌ Email hoặc mật khẩu không đúng!');
-                    else showAlert(`❌ Lỗi Firebase: ${err.message}`);
-                } finally {
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = currentAuthMode === 'register' ? '<span>Tạo tài khoản lên Cloud</span>' : '<span>Đăng nhập đồng bộ Cloud</span>';
-                    }
-                }
-            });
-        }
-
-        function enterDashboard(uid, email, familyName) {
-            currentUser = { uid, email, familyName };
-            const authScr = document.getElementById('authScreen');
-            const appScr = document.getElementById('appScreen');
-            const famNameHeader = document.getElementById('headerFamilyName');
-            const userEmailHeader = document.getElementById('headerUserEmail');
-
-            if (authScr) authScr.style.display = 'none';
-            if (appScr) appScr.style.display = 'flex';
-            if (famNameHeader) famNameHeader.textContent = familyName;
-            if (userEmailHeader) userEmailHeader.textContent = email;
+        function enterUserDashboard(uid, email, familyName) {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('adminAppScreen').style.display = 'none';
+            document.getElementById('userAppScreen').style.display = 'flex';
+            document.getElementById('headerFamilyName').textContent = familyName;
+            document.getElementById('headerUserEmail').textContent = email;
 
             if (unsubscribeFirestore) unsubscribeFirestore();
+            if (unsubscribeRequests) unsubscribeRequests();
+
+            // Lắng nghe giao dịch cá nhân
             unsubscribeFirestore = db.collection('families').doc(uid).collection('transactions')
                 .onSnapshot((snapshot) => {
-                    try {
-                        transactions = [];
-                        snapshot.forEach(d => transactions.push({ id: d.id, ...d.data() }));
-                        renderApp();
-                    } catch (snapErr) {
-                        console.error("Snapshot process error:", snapErr);
-                    }
-                }, (error) => {
-                    const tbody = document.getElementById('txTableBody');
-                    if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #e11d48; font-weight: bold;">❌ Chưa mở quyền Firestore Database Rules hoặc chưa tạo Database!</td></tr>`;
+                    transactions = [];
+                    snapshot.forEach(d => transactions.push({ id: d.id, ...d.data() }));
+                    renderUserApp();
                 });
+
+            // Lắng nghe đơn xét duyệt của chính user này
+            unsubscribeRequests = db.collection('approval_requests').where('userId', '==', uid)
+                .onSnapshot((snapshot) => {
+                    userRequests = [];
+                    snapshot.forEach(d => userRequests.push({ id: d.id, ...d.data() }));
+                    userRequests.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+                    renderUserRequests();
+                });
+        }
+
+        function enterAdminDashboard(email) {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('userAppScreen').style.display = 'none';
+            document.getElementById('adminAppScreen').style.display = 'flex';
+            document.getElementById('adminEmail').textContent = email;
+
+            if (unsubscribeAdminAll) unsubscribeAdminAll();
+
+            // Admin xem toàn bộ đơn xét duyệt của mọi người dùng
+            unsubscribeAdminAll = db.collection('approval_requests')
+                .onSnapshot((snapshot) => {
+                    allSystemRequests = [];
+                    snapshot.forEach(d => allSystemRequests.push({ id: d.id, ...d.data() }));
+                    allSystemRequests.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+                    renderAdminRequests();
+                });
+
+            // Lắng nghe toàn bộ giao dịch của hệ thống (nếu muốn admin xem chi tiêu tất cả users)
+            db.collectionGroup('transactions').get().then(snapshot => {
+                allSystemTransactions = [];
+                snapshot.forEach(d => allSystemTransactions.push({ id: d.id, userId: d.ref.path.split('/')[1], ...d.data() }));
+                allSystemTransactions.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+                renderAdminAllTransactions();
+            }).catch(e => console.error(e));
         }
 
         async function handleLogout() {
-            try {
-                if (unsubscribeFirestore) unsubscribeFirestore();
-                if (auth) await auth.signOut();
-            } catch (e) { console.error("Logout error:", e); }
+            if (unsubscribeFirestore) unsubscribeFirestore();
+            if (unsubscribeRequests) unsubscribeRequests();
+            if (unsubscribeAdminAll) unsubscribeAdminAll();
+            if (auth) await auth.signOut();
         }
 
-        // Lưu giao dịch thu chi thường
-        const txForm = document.getElementById('txForm');
-        if (txForm) {
-            txForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!currentUser || !db) return;
-                const btn = e.target.querySelector('button[type="submit"]');
-                if (btn) { btn.disabled = true; btn.textContent = "Đang lưu..."; }
-
-                const amountEl = document.getElementById('txAmount');
-                const catEl = document.getElementById('txCategory');
-                const accEl = document.getElementById('txAccount');
-                const dateEl = document.getElementById('txDate');
-                const noteEl = document.getElementById('txNote');
-                const todayStr = new Date().toISOString().split('T')[0];
-
-                const newTx = {
-                    type: currentTxType,
-                    amount: amountEl ? Number(amountEl.value) : 0,
-                    category: catEl ? catEl.value : '',
-                    member: accEl ? accEl.value : 'Tiền mặt',
-                    date: dateEl ? dateEl.value : todayStr,
-                    note: noteEl && noteEl.value ? noteEl.value.trim() : '',
-                    createdAt: new Date().toISOString()
-                };
-
-                try {
-                    await db.collection('families').doc(currentUser.uid).collection('transactions').add(newTx);
-                    if (amountEl) amountEl.value = '';
-                    if (noteEl) noteEl.value = '';
-                } catch (err) {
-                    alert("❌ Lỗi lưu dữ liệu: Hãy kiểm tra quyền Firestore Rules!");
-                } finally {
-                    if (btn) { btn.disabled = false; btn.textContent = "☁️ Lưu giao dịch"; }
-                }
-            });
-        }
-
-        // Cập nhật số dư thực tế nhanh
-        const updateBalanceForm = document.getElementById('updateBalanceForm');
-        if (updateBalanceForm) {
-            updateBalanceForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!currentUser || !db) return;
-
-                const targetAcc = document.getElementById('adjAccount').value;
-                const targetBalance = Number(document.getElementById('adjNewBalance').value);
-                if (isNaN(targetBalance)) return;
-
-                // Tính số dư hiện tại trên mây của tài khoản này
-                let currentBal = 0;
-                transactions.forEach(t => {
-                    const acc = t.member || 'Tiền mặt';
-                    if (acc === targetAcc) {
-                        if (t.type === 'income') currentBal += Number(t.amount);
-                        else currentBal -= Number(t.amount);
-                    }
-                });
-
-                const diff = targetBalance - currentBal;
-                if (diff === 0) return alert('Số dư hiện tại trên web đã trùng khớp với số tiền này!');
-
-                const btn = e.target.querySelector('button[type="submit"]');
-                if (btn) { btn.disabled = true; btn.textContent = "Đang điều chỉnh..."; }
-
-                const todayStr = new Date().toISOString().split('T')[0];
-                const adjTx = {
-                    type: diff > 0 ? 'income' : 'expense',
-                    amount: Math.abs(diff),
-                    category: 'Cập nhật số dư',
-                    member: targetAcc,
-                    date: todayStr,
-                    note: `Điều chỉnh số dư thực tế về ${formatVND(targetBalance)}`,
-                    createdAt: new Date().toISOString()
-                };
-
-                try {
-                    await db.collection('families').doc(currentUser.uid).collection('transactions').add(adjTx);
-                    document.getElementById('adjNewBalance').value = '';
-                    alert(`✓ Đã khớp số dư ${targetAcc} thành ${formatVND(targetBalance)}`);
-                } catch (err) {
-                    alert("❌ Không thể cập nhật số dư: " + err.message);
-                } finally {
-                    if (btn) { btn.disabled = false; btn.textContent = "⚡ Khớp số dư thực tế"; }
-                }
-            });
-        }
-
-        async function deleteTx(id) {
+        // Ghi nhận giao dịch cá nhân User
+        document.getElementById('txForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             if (!currentUser || !db) return;
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = "Đang lưu...";
+
+            const newTx = {
+                type: currentTxType,
+                amount: Number(document.getElementById('txAmount').value),
+                category: document.getElementById('txCategory').value,
+                member: document.getElementById('txAccount').value,
+                date: document.getElementById('txDate').value,
+                note: document.getElementById('txNote').value.trim(),
+                createdAt: new Date().toISOString()
+            };
+
             try {
-                await db.collection('families').doc(currentUser.uid).collection('transactions').doc(id).delete();
-            } catch (err) {
-                alert("Không thể xóa giao dịch: " + err.message);
-            }
-        }
+                await db.collection('families').doc(currentUser.uid).collection('transactions').add(newTx);
+                document.getElementById('txAmount').value = '';
+                document.getElementById('txNote').value = '';
+            } catch (err) { alert("Lỗi lưu giao dịch: " + err.message); }
+            finally { btn.disabled = false; btn.textContent = "☁️ Lưu giao dịch"; }
+        });
 
-        function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫'; }
+        // Khớp số dư nhanh
+        document.getElementById('updateBalanceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !db) return;
+            const targetAcc = document.getElementById('adjAccount').value;
+            const targetBalance = Number(document.getElementById('adjNewBalance').value);
+            
+            let currentBal = 0;
+            transactions.forEach(t => {
+                if ((t.member || 'Tiền mặt') === targetAcc) {
+                    if (t.type === 'income') currentBal += Number(t.amount);
+                    else currentBal -= Number(t.amount);
+                }
+            });
 
-        // Tính toán toàn bộ số dư và hiển thị
+            const diff = targetBalance - currentBal;
+            if (diff === 0) return alert('Số dư đã khớp thực tế!');
+
+            const adjTx = {
+                type: diff > 0 ? 'income' : 'expense',
+                amount: Math.abs(diff),
+                category: 'Cập nhật số dư',
+                member: targetAcc,
+                date: new Date().toISOString().split('T')[0],
+                note: `Khớp số dư thực tế về ${formatVND(targetBalance)}`,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await db.collection('families').doc(currentUser.uid).collection('transactions').add(adjTx);
+                document.getElementById('adjNewBalance').value = '';
+                alert(`✓ Đã cập nhật khớp số dư ${targetAcc}`);
+            } catch (err) { alert(err.message); }
+        });
+
+        // Gửi đơn xét duyệt giải ngân
+        document.getElementById('approvalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !db) return;
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = "Đang gửi...";
+
+            const requestData = {
+                userId: currentUser.uid,
+                userEmail: currentUser.email,
+                amount: Number(document.getElementById('reqAmount').value),
+                account: document.getElementById('reqAccount').value,
+                reason: document.getElementById('reqReason').value.trim(),
+                status: 'pending', // pending, approved, rejected
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await db.collection('approval_requests').add(requestData);
+                document.getElementById('reqAmount').value = '';
+                document.getElementById('reqReason').value = '';
+                alert('✓ Đã gửi đơn xét duyệt thành công đến Admin!');
+            } catch (err) { alert("Lỗi gửi đơn: " + err.message); }
+            finally { btn.disabled = false; btn.textContent = "📤 Gửi đơn đến Admin"; }
+        });
+
         function calculateBalances() {
             const accBalances = {};
             ACCOUNT_LIST.forEach(acc => accBalances[acc] = 0);
@@ -595,189 +632,179 @@
             return accBalances;
         }
 
-        function renderApp() {
+        function renderUserApp() {
             try {
                 const monthEl = document.getElementById('monthFilter');
-                const searchEl = document.getElementById('searchInput');
-                const filterAccEl = document.getElementById('filterAccount');
-
                 const selectedMonth = monthEl ? monthEl.value : '';
-                const searchKey = searchEl && searchEl.value ? searchEl.value.toLowerCase() : '';
-                const accountFilter = filterAccEl ? filterAccEl.value : 'ALL';
 
                 const filtered = transactions.filter(t => {
-                    const matchMonth = !selectedMonth || (t.date && t.date.startsWith(selectedMonth));
-                    const matchAccount = accountFilter === 'ALL' || t.member === accountFilter;
-                    const matchSearch = !searchKey || 
-                        (t.note && t.note.toLowerCase().includes(searchKey)) || 
-                        (t.category && t.category.toLowerCase().includes(searchKey));
-                    return matchMonth && matchAccount && matchSearch;
+                    return !selectedMonth || (t.date && t.date.startsWith(selectedMonth));
                 }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
                 let inc = 0, exp = 0;
                 filtered.forEach(t => t.type === 'income' ? inc += Number(t.amount) : exp += Number(t.amount));
                 
-                // Số dư tổng cộng tính trên toàn thời gian
                 const allBalances = calculateBalances();
                 const totalBalanceAllTime = Object.values(allBalances).reduce((a, b) => a + b, 0);
-
                 const rate = inc > 0 ? Math.max(0, Math.round(((inc - exp) / inc) * 100)) : 0;
 
-                const kpiInc = document.getElementById('kpiIncome');
-                const kpiExp = document.getElementById('kpiExpense');
-                const kpiBal = document.getElementById('kpiBalance');
-                const kpiRate = document.getElementById('kpiSavingRate');
-                if (kpiInc) kpiInc.textContent = formatVND(inc);
-                if (kpiExp) kpiExp.textContent = formatVND(exp);
-                if (kpiBal) kpiBal.textContent = formatVND(totalBalanceAllTime);
-                if (kpiRate) kpiRate.textContent = rate + '%';
+                document.getElementById('kpiIncome').textContent = formatVND(inc);
+                document.getElementById('kpiExpense').textContent = formatVND(exp);
+                document.getElementById('kpiBalance').textContent = formatVND(totalBalanceAllTime);
+                document.getElementById('kpiSavingRate').textContent = rate + '%';
 
-                // Lọc hiển thị ngân hàng
                 let visibleAccs = ACCOUNT_LIST.filter(acc => (allBalances[acc] || 0) !== 0);
                 if (!showAllAccounts) {
-                    if (visibleAccs.length === 0) {
-                        // Nếu tất cả 0đ thì lấy 4 cái đầu tiên
-                        visibleAccs = ACCOUNT_LIST.slice(0, 4);
-                    } else if (visibleAccs.length > 4) {
-                        visibleAccs = visibleAccs.slice(0, 4);
-                    }
+                    visibleAccs = visibleAccs.length === 0 ? ACCOUNT_LIST.slice(0, 4) : visibleAccs.slice(0, 4);
                 } else {
                     visibleAccs = ACCOUNT_LIST;
                 }
 
                 const grid = document.getElementById('accountBalancesGrid');
-                if (grid) {
-                    grid.innerHTML = visibleAccs.map(acc => {
-                        const icon = ACCOUNT_ICONS[acc] || '💳';
-                        const balance = allBalances[acc] || 0;
-                        return `
-                            <div style="padding: 12px; border-radius: 12px; background: ${balance !== 0 ? '#ffffff' : '#f8fafc'}; border: 1px solid ${balance !== 0 ? '#cbd5e1' : '#e2e8f0'}; text-align: center; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
-                                <p style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin: 0 0 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${icon} ${acc}</p>
-                                <p style="font-size: 14px; font-weight: 900; color: ${balance > 0 ? '#059669' : (balance < 0 ? '#e11d48' : '#94a3b8')}; margin: 0;">${formatVND(balance)}</p>
-                            </div>
-                        `;
-                    }).join('');
-                }
+                grid.innerHTML = visibleAccs.map(acc => {
+                    const balance = allBalances[acc] || 0;
+                    return `
+                        <div style="padding: 12px; border-radius: 12px; background: ${balance !== 0 ? '#ffffff' : '#f8fafc'}; border: 1px solid ${balance !== 0 ? '#cbd5e1' : '#e2e8f0'}; text-align: center;">
+                            <p style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin: 0 0 4px 0;">${ACCOUNT_ICONS[acc]} ${acc}</p>
+                            <p style="font-size: 14px; font-weight: 900; color: ${balance > 0 ? '#059669' : (balance < 0 ? '#e11d48' : '#94a3b8')}; margin: 0;">${formatVND(balance)}</p>
+                        </div>
+                    `;
+                }).join('');
 
                 const tbody = document.getElementById('txTableBody');
-                if (tbody) {
-                    if (filtered.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="6" style="padding: 32px; text-align: center; color: #94a3b8; font-weight: 500;">Chưa có giao dịch nào trong kỳ này.</td></tr>`;
-                    } else {
-                        tbody.innerHTML = filtered.map(t => {
-                            const accName = t.member || 'Tiền mặt';
-                            const icon = ACCOUNT_ICONS[accName] || '💳';
-                            return `
-                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                    <td style="padding: 12px; color: #475569; font-weight: 500;">${t.date || '-'}</td>
-                                    <td style="padding: 12px; font-weight: bold; color: #1e293b;">${t.category}</td>
-                                    <td style="padding: 12px; color: #475569;">${t.note || ''}</td>
-                                    <td style="padding: 12px;"><span style="padding: 2px 8px; border-radius: 6px; background: #f1f5f9; color: #334155; font-weight: bold; font-size: 10px; text-transform: uppercase;">${icon} ${accName}</span></td>
-                                    <td style="padding: 12px; text-align: right; font-weight: 900; font-size: 13px; color: ${t.type === 'income' ? '#059669' : '#e11d48'};">
-                                        ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
-                                    </td>
-                                    <td style="padding: 12px; text-align: center;">
-                                        <button onclick="deleteTx('${t.id}')" style="background: transparent; border: none; color: #e11d48; font-weight: bold; cursor: pointer; padding: 4px 8px;">✕</button>
-                                    </td>
-                                </tr>
-                            `;
-                        }).join('');
-                    }
-                }
-
-                processApproval();
-            } catch (err) {
-                console.error("Render app error:", err);
-            }
-        }
-
-        // Xử lý logic giải ngân và tạo văn bản tờ trình
-        function processApproval() {
-            try {
-                const amount = Number(document.getElementById('apprAmount').value) || 0;
-                const reason = document.getElementById('apprReason').value.trim() || 'Thanh toán chi phí gia đình';
-                const selectEl = document.getElementById('apprSourceAcc');
-                const docEl = document.getElementById('approvalDocText');
-
-                const allBalances = calculateBalances();
-                
-                // Lọc các ngân hàng có số dư >= số tiền yêu cầu
-                const validAccs = ACCOUNT_LIST.filter(acc => (allBalances[acc] || 0) >= amount && amount > 0);
-
-                let currentSel = selectEl.value;
-                selectEl.innerHTML = '';
-
-                if (amount <= 0) {
-                    selectEl.innerHTML = '<option value="">Nhập số tiền để lọc ngân hàng...</option>';
-                    if (docEl) docEl.textContent = 'Vui lòng nhập số tiền chi đề xuất và lý do để hệ thống tự động kiểm tra số dư ngân hàng và lập tờ trình...';
-                    return;
-                }
-
-                if (validAccs.length === 0) {
-                    selectEl.innerHTML = '<option value="">❌ Không có tài khoản nào đủ số dư!</option>';
-                    if (docEl) docEl.textContent = `⚠️ KHÔNG THỂ GIẢI NGÂN!\nKhông có ngân hàng nào có đủ số dư ${formatVND(amount)} để thực hiện khoản chi này.`;
-                    return;
-                }
-
-                validAccs.forEach(acc => {
-                    const icon = ACCOUNT_ICONS[acc] || '💳';
-                    selectEl.innerHTML += `<option value="${acc}">${icon} ${acc} (Dư: ${formatVND(allBalances[acc])})</option>`;
-                });
-
-                if (validAccs.includes(currentSel)) {
-                    selectEl.value = currentSel;
+                if (filtered.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="padding: 24px; text-align: center; color: #94a3b8;">Chưa có giao dịch.</td></tr>`;
                 } else {
-                    selectEl.value = validAccs[0];
+                    tbody.innerHTML = filtered.map(t => `
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 10px; color: #475569;">${t.date || '-'}</td>
+                            <td style="padding: 10px; font-weight: bold; color: #1e293b;">${t.category}</td>
+                            <td style="padding: 10px; color: #475569;">${t.note || ''}</td>
+                            <td style="padding: 10px; text-align: right; font-weight: bold; color: ${t.type === 'income' ? '#059669' : '#e11d48'};">
+                                ${t.type === 'income' ? '+' : '-'}${formatVND(t.amount)}
+                            </td>
+                        </tr>
+                    `).join('');
                 }
-
-                const chosenAcc = selectEl.value;
-                const chosenBal = allBalances[chosenAcc] || 0;
-                const remainBal = chosenBal - amount;
-                const todayFormatted = new Date().toLocaleDateString('vi-VN');
-
-                const docContent = 
-`TỜ TRÌNH XIN XÉT DUYỆT GIẢI NGÂN
----------------------------------
-• Ngày lập: ${todayFormatted}
-• Quỹ / Đơn vị: ${currentUser ? currentUser.familyName : 'Quỹ Gia Đình'}
-• Lý do giải ngân: ${reason}
-• Số tiền đề xuất chi: ${formatVND(amount)}
-
-PHƯƠNG ÁN TRÍCH TIỀN:
-• Ngân hàng chỉ định: ${chosenAcc}
-• Số dư khả dụng hiện tại: ${formatVND(chosenBal)}
-• Số dư dự kiến sau trích: ${formatVND(remainBal)}
-
-ĐÁNH GIÁ: Tài khoản ${chosenAcc} ĐỦ ĐIỀU KIỆN GIẢI NGÂN.
-Trân trọng trình phê duyệt!`;
-
-                if (docEl) docEl.textContent = docContent;
-
-            } catch (e) { console.error("Process approval error:", e); }
+            } catch (e) { console.error(e); }
         }
 
-        function copyApprovalDoc() {
-            const text = document.getElementById('approvalDocText').textContent;
-            if (!text || text.startsWith('Vui lòng') || text.startsWith('⚠️')) {
-                return alert('Chưa có nội dung tờ trình hợp lệ để copy!');
+        function renderUserRequests() {
+            const tbody = document.getElementById('userRequestsTableBody');
+            if (userRequests.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="padding: 24px; text-align: center; color: #94a3b8;">Chưa có đơn xét duyệt nào.</td></tr>`;
+                return;
             }
-            navigator.clipboard.writeText(text).then(() => {
-                alert('✓ Đã copy Tờ trình xét duyệt giải ngân vào bộ nhớ tạm!');
-            }).catch(() => {
-                alert('Không thể copy tự động, vui lòng chọn văn bản và copy thủ công.');
-            });
+            tbody.innerHTML = userRequests.map(req => {
+                let statusBadge = '';
+                if (req.status === 'pending') statusBadge = '<span style="color: #d97706; background: #fef3c7; padding: 2px 8px; border-radius: 9999px; font-weight: bold;">Đang đợi duyệt</span>';
+                else if (req.status === 'approved') statusBadge = '<span style="color: #059669; background: #d1fae5; padding: 2px 8px; border-radius: 9999px; font-weight: bold;">Đã phê duyệt (Đã trừ tiền)</span>';
+                else statusBadge = '<span style="color: #e11d48; background: #fee2e2; padding: 2px 8px; border-radius: 9999px; font-weight: bold;">Từ chối</span>';
+
+                return `
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 10px; color: #475569;">${req.createdAt.split('T')[0]}</td>
+                        <td style="padding: 10px; font-weight: 500; color: #1e293b;">${req.reason} (${req.account})</td>
+                        <td style="padding: 10px; text-align: right; font-weight: bold; color: #1e293b;">${formatVND(req.amount)}</td>
+                        <td style="padding: 10px; text-align: center;">${statusBadge}</td>
+                    </tr>
+                `;
+            }).join('');
         }
+
+        function renderAdminRequests() {
+            const tbody = document.getElementById('adminRequestsTableBody');
+            const pendingReqs = allSystemRequests.filter(r => r.status === 'pending');
+
+            if (pendingReqs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="padding: 32px; text-align: center; color: #94a3b8;">Tuyệt vời! Không có đơn xét duyệt nào đang đợi.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = pendingReqs.map(req => `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px; color: #475569;">${req.createdAt.split('T')[0]}</td>
+                    <td style="padding: 12px; font-weight: bold; color: #2563eb;">${req.userEmail}</td>
+                    <td style="padding: 12px;">${req.account}</td>
+                    <td style="padding: 12px; color: #1e293b;">${req.reason}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 900; color: #e11d48;">${formatVND(req.amount)}</td>
+                    <td style="padding: 12px; text-align: center; display: flex; gap: 8px; justify-content: center;">
+                        <button onclick="approveRequest('${req.id}')" style="background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Phê duyệt & Trừ tiền</button>
+                        <button onclick="rejectRequest('${req.id}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Từ chối</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAdminAllTransactions() {
+            const tbody = document.getElementById('adminAllTxTableBody');
+            if (allSystemTransactions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #94a3b8;">Chưa có dữ liệu giao dịch hệ thống.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = allSystemTransactions.map(t => `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 10px; color: #475569;">${t.date || '-'}</td>
+                    <td style="padding: 10px; font-weight: 500; color: #2563eb;">User ID: ${t.userId.slice(0,6)}...</td>
+                    <td style="padding: 10px; font-weight: bold; color: ${t.type === 'income' ? '#059669' : '#e11d48'};">${t.type === 'income' ? 'Thu' : 'Chi'}</td>
+                    <td style="padding: 10px; font-weight: bold;">${t.category}</td>
+                    <td style="padding: 10px; color: #475569;">${t.note || ''}</td>
+                    <td style="padding: 10px; text-align: right; font-weight: bold; color: ${t.type === 'income' ? '#059669' : '#e11d48'};">${formatVND(t.amount)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Admin Phê duyệt đơn: Tự động trừ tiền bằng cách thêm giao dịch expense vào subcollection transactions của user đó
+        async function approveRequest(reqId) {
+            const req = allSystemRequests.find(r => r.id === reqId);
+            if (!req) return;
+
+            if (!confirm(`Xác nhận phê duyệt đơn cho ${req.userEmail} với số tiền ${formatVND(req.amount)}? Hệ thống sẽ tự động trừ tiền vào tài khoản ${req.account} của họ.`)) return;
+
+            try {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const newExpenseTx = {
+                    type: 'expense',
+                    amount: req.amount,
+                    category: 'Chi phí giải ngân (Admin duyệt)',
+                    member: req.account,
+                    date: todayStr,
+                    note: `Giải ngân: ${req.reason}`,
+                    createdAt: new Date().toISOString()
+                };
+
+                // 1. Thêm giao dịch trừ tiền vào database của user đó
+                await db.collection('families').doc(req.userId).collection('transactions').add(newExpenseTx);
+
+                // 2. Cập nhật trạng thái đơn thành approved
+                await db.collection('approval_requests').doc(reqId).update({ status: 'approved' });
+
+                alert('✓ Đã phê duyệt và trừ tiền thành công vào tài khoản người dùng!');
+            } catch (err) {
+                alert('Lỗi phê duyệt: ' + err.message);
+            }
+        }
+
+        async function rejectRequest(reqId) {
+            if (!confirm('Xác nhận từ chối đơn xét duyệt này?')) return;
+            try {
+                await db.collection('approval_requests').doc(reqId).update({ status: 'rejected' });
+                alert('Đã từ chối đơn.');
+            } catch (err) { alert(err.message); }
+        }
+
+        function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫'; }
 
         function exportCSV() {
-            if (!transactions.length) return alert('Chưa có giao dịch nào để xuất!');
-            let csv = '\uFEFFNgày,Loại,Danh mục,Tài khoản / Ngân hàng,Số tiền,Ghi chú\n';
+            if (!transactions.length) return alert('Chưa có giao dịch để xuất!');
+            let csv = '\uFEFFNgày,Loại,Danh mục,Tài khoản,Số tiền,Ghi chú\n';
             transactions.forEach(t => {
-                csv += `${t.date || ''},${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'},"${t.category}","${t.member || 'Tiền mặt'}",${t.amount},"${t.note || ''}"\n`;
+                csv += `${t.date || ''},${t.type},"${t.category}","${t.member || 'Tiền mặt'}",${t.amount},"${t.note || ''}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `Bao_cao_tai_khoan_${new Date().toISOString().slice(0,10)}.csv`;
+            link.download = `Bao_cao_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
     </script>
